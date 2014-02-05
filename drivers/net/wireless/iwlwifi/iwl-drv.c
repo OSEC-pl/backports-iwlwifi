@@ -949,13 +949,12 @@ _iwl_op_mode_start(struct iwl_drv *drv, struct iwlwifi_opmode_table *op)
 	return op_mode;
 }
 
-static void _iwl_op_mode_stop(struct iwl_drv *drv, bool free_tm)
+static void _iwl_op_mode_stop(struct iwl_drv *drv)
 {
 	/* op_mode can be NULL if its start failed */
 	if (drv->op_mode) {
 		iwl_op_mode_stop(drv->op_mode);
-		if (free_tm)
-			iwl_tm_gnl_remove(drv->trans);
+		iwl_tm_gnl_remove(drv->trans);
 		drv->op_mode = NULL;
 
 #ifdef CPTCFG_IWLWIFI_DEBUGFS
@@ -1235,7 +1234,7 @@ void iwl_drv_stop(struct iwl_drv *drv)
 {
 	wait_for_completion(&drv->request_firmware_complete);
 
-	_iwl_op_mode_stop(drv, true);
+	_iwl_op_mode_stop(drv);
 
 	iwl_dealloc_ucode(drv);
 
@@ -1308,7 +1307,7 @@ void iwl_opmode_deregister(const char *name)
 
 		/* call the stop routine for all devices */
 		list_for_each_entry(drv, &iwlwifi_opmode_table[i].drv, list)
-			_iwl_op_mode_stop(drv, true);
+			_iwl_op_mode_stop(drv);
 
 		mutex_unlock(&iwlwifi_opmode_table_mtx);
 		return;
