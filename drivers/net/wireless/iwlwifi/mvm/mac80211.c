@@ -749,6 +749,15 @@ static void iwl_mvm_cleanup_iterator(void *data, u8 *mac,
 
 static void iwl_mvm_restart_cleanup(struct iwl_mvm *mvm)
 {
+#ifdef CPTCFG_IWLWIFI_DEBUGFS
+	static char *env[] = { "DRIVER=iwlwifi", "EVENT=error_dump", NULL };
+
+	iwl_mvm_fw_error_dump(mvm);
+
+	/* notify the userspace about the error we had */
+	kobject_uevent_env(&mvm->hw->wiphy->dev.kobj, KOBJ_CHANGE, env);
+#endif
+
 	/* cleanup all stale references (scan, roc), but keep the
 	 * ucode_down ref until reconfig is complete
 	 */
