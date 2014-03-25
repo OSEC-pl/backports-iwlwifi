@@ -947,7 +947,6 @@ cfg80211_inform_bss_width_frame(struct wiphy *wiphy,
 	struct ieee80211_channel *channel;
 	size_t ielen = len - offsetof(struct ieee80211_mgmt,
 				      u.probe_resp.variable);
-	u16 rx_freq;
 
 	BUILD_BUG_ON(offsetof(struct ieee80211_mgmt, u.probe_resp.variable) !=
 			offsetof(struct ieee80211_mgmt, u.beacon.variable));
@@ -968,7 +967,6 @@ cfg80211_inform_bss_width_frame(struct wiphy *wiphy,
 	if (WARN_ON(len < offsetof(struct ieee80211_mgmt, u.probe_resp.variable)))
 		return NULL;
 
-	rx_freq = channel->center_freq;
 	channel = cfg80211_get_bss_channel(wiphy, mgmt->u.beacon.variable,
 					   ielen, rx_channel);
 	if (!channel)
