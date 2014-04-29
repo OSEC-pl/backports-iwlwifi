@@ -681,6 +681,8 @@ struct iwl_mvm {
 	bool pm_disabled;
 
 	struct ieee80211_vif *csa_vif;
+
+	bool lar_regdom_set;
 };
 
 /* Extract MVM priv from op_mode and _hw */

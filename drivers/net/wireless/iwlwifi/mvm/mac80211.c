@@ -298,6 +298,7 @@ static struct ieee80211_regdomain *iwl_mvm_get_regdomain(struct wiphy *wiphy,
 
 	IWL_DEBUG_LAR(mvm, "setting alpha2 from FW to %s (0x%x, 0x%x)\n",
 		      regd->alpha2, regd->alpha2[0], regd->alpha2[1]);
+	mvm->lar_regdom_set = true;
 
 out_unlock:
 	mutex_unlock(&mvm->mutex);
@@ -1615,6 +1616,12 @@ static int iwl_mvm_mac_hw_scan(struct ieee80211_hw *hw,
 
 	mutex_lock(&mvm->mutex);
 
+	if (iwl_mvm_is_lar_supported(mvm) && !mvm->lar_regdom_set) {
+		IWL_ERR(mvm, "scan while LAR regdomain is not set\n");
+		ret = -EBUSY;
+		goto out;
+	}
+
 	switch (mvm->scan_status) {
 	case IWL_MVM_SCAN_SCHED:
 		ret = iwl_mvm_sched_scan_stop(mvm, true);
@@ -1896,6 +1903,12 @@ static int iwl_mvm_mac_sched_scan_start(struct ieee80211_hw *hw,
 	int ret;
 
 	mutex_lock(&mvm->mutex);
+
+	if (iwl_mvm_is_lar_supported(mvm) && !mvm->lar_regdom_set) {
+		IWL_ERR(mvm, "sched-scan while LAR regdomain is not set\n");
+		ret = -EBUSY;
+		goto out;
+	}
 
 	if (!iwl_mvm_is_idle(mvm)) {
 		ret = -EBUSY;
