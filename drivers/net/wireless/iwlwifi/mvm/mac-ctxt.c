@@ -795,6 +795,13 @@ static int iwl_mvm_mac_ctxt_cmd_p2p_client(struct iwl_mvm *mvm,
 	/* Fill the common data for all mac context types */
 	iwl_mvm_mac_ctxt_cmd_common(mvm, vif, &cmd, bssid_override, action);
 
+	/* Allow beacons to pass through as long as we are not associated,or we
+	 * do not have dtim period information */
+	if (!vif->bss_conf.assoc || !vif->bss_conf.dtim_period)
+		cmd.filter_flags |= cpu_to_le32(MAC_FILTER_IN_BEACON);
+	else
+		cmd.filter_flags &= ~cpu_to_le32(MAC_FILTER_IN_BEACON);
+
 	/* Fill the data specific for station mode */
 	iwl_mvm_mac_ctxt_cmd_fill_sta(mvm, vif, &cmd.p2p_sta.sta,
 				      action == FW_CTXT_ACTION_ADD);
