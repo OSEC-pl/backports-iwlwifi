@@ -116,11 +116,6 @@ static void iwl_mvm_quota_iterator(void *_data, u8 *mac,
 	if (WARN_ON_ONCE(id >= MAX_BINDINGS))
 		return;
 
-	if (data->colors[id] < 0)
-		data->colors[id] = mvmvif->phy_ctxt->color;
-	else
-		WARN_ON_ONCE(data->colors[id] != mvmvif->phy_ctxt->color);
-
 	switch (vif->type) {
 	case NL80211_IFTYPE_STATION:
 		if (vif->bss_conf.assoc)
@@ -141,6 +136,11 @@ static void iwl_mvm_quota_iterator(void *_data, u8 *mac,
 		WARN_ON_ONCE(1);
 		return;
 	}
+
+	if (data->colors[id] < 0)
+		data->colors[id] = mvmvif->phy_ctxt->color;
+	else
+		WARN_ON_ONCE(data->colors[id] != mvmvif->phy_ctxt->color);
 
 	data->n_interfaces[id]++;
 
