@@ -67,6 +67,8 @@
 #include <linux/types.h>
 #include <net/mac80211.h>
 
+#include "iwl-fw-file.h"
+
 /**
  * enum iwl_ucode_tlv_flag - ucode API flags
  * @IWL_UCODE_TLV_FLAGS_PAN: This is PAN capable microcode; this previously
@@ -319,6 +321,8 @@ struct iwl_fw {
 	u8 valid_rx_ant;
 
 	bool mvm_fw;
+
+	u8 human_readable[FW_VER_HUMAN_READABLE_SZ];
 
 	struct ieee80211_cipher_scheme cs[IWL_UCODE_MAX_CS];
 };
