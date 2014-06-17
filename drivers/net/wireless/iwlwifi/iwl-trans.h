@@ -472,6 +472,10 @@ struct iwl_trans_ops {
 
 	int (*start_hw)(struct iwl_trans *iwl_trans);
 	void (*op_mode_leave)(struct iwl_trans *iwl_trans);
+#if IS_ENABLED(CPTCFG_IWLXVT)
+	int (*start_fw_dbg)(struct iwl_trans *trans, const struct fw_img *fw,
+			    bool run_in_rfkill, u32 fw_dbg_flags);
+#endif
 	int (*start_fw)(struct iwl_trans *trans, const struct fw_img *fw,
 			bool run_in_rfkill);
 	void (*fw_alive)(struct iwl_trans *trans, u32 scd_addr);
@@ -637,6 +641,31 @@ static inline int iwl_trans_start_fw(struct iwl_trans *trans,
 	clear_bit(STATUS_FW_ERROR, &trans->status);
 	return trans->ops->start_fw(trans, fw, run_in_rfkill);
 }
+
+#if IS_ENABLED(CPTCFG_IWLXVT)
+enum iwl_xvt_dbg_flags {
+	IWL_XVT_DBG_ADC_SAMP_TEST = BIT(0),
+	IWL_XVT_DBG_ADC_SAMP_SYNC_RX = BIT(1),
+};
+
+static inline int iwl_trans_start_fw_dbg(struct iwl_trans *trans,
+					 const struct fw_img *fw,
+					 bool run_in_rfkill,
+					 u32 dbg_flags)
+{
+	might_sleep();
+
+	if (WARN_ON_ONCE(!trans->ops->start_fw_dbg && dbg_flags))
+		return -ENOTSUPP;
+
+	clear_bit(STATUS_FW_ERROR, &trans->status);
+	if (trans->ops->start_fw_dbg)
+		return trans->ops->start_fw_dbg(trans, fw, run_in_rfkill,
+						dbg_flags);
+
+	return trans->ops->start_fw(trans, fw, run_in_rfkill);
+}
+#endif
 
 static inline void iwl_trans_stop_device(struct iwl_trans *trans)
 {
