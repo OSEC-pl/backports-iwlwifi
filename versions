@@ -1,4 +1,4 @@
 BACKPORTS_VERSION="(see git)"
 BACKPORTED_KERNEL_VERSION="(see git)"
 BACKPORTED_KERNEL_NAME="iwlwifi"
-BACKPORTS_GIT_TRACKED="commit:iwlwifi-public:release/LinuxCore7:3014:517c1ccd"
+BACKPORTS_GIT_TRACKED="commit:iwlwifi-public:release/LinuxCore7:3046:772f898e"
