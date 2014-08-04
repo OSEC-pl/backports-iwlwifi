@@ -1163,7 +1163,8 @@ static u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
 	bool pass_all = false;
 	int len;
 
-	if (addr_count > MAX_MCAST_FILTERING_ADDRESSES) {
+	if (addr_count > MAX_MCAST_FILTERING_ADDRESSES ||
+	    IWL_MVM_FW_MCAST_FILTER_PASS_ALL) {
 		pass_all = true;
 		addr_count = 0;
 	}
