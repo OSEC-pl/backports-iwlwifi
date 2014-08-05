@@ -64,7 +64,6 @@
  *****************************************************************************/
 #include <linux/types.h>
 #include <linux/export.h>
-#include <linux/vmalloc.h>
 
 #include "iwl-debug.h"
 #include "iwl-dnt-cfg.h"
