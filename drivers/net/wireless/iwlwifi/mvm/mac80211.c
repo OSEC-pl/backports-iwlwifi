@@ -893,6 +893,7 @@ static void iwl_mvm_restart_cleanup(struct iwl_mvm *mvm)
 
 	mvm->scan_status = IWL_MVM_SCAN_NONE;
 	mvm->calibrating = false;
+	mvm->ps_disabled = false;
 
 	/* just in case one was running */
 	ieee80211_remain_on_channel_expired(mvm->hw);
