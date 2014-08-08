@@ -1056,6 +1056,7 @@ void rs_update_last_rssi(struct iwl_mvm *mvm,
 /* power management */
 int iwl_mvm_power_update_device(struct iwl_mvm *mvm);
 int iwl_mvm_power_update_mac(struct iwl_mvm *mvm);
+int iwl_mvm_power_update_ps(struct iwl_mvm *mvm);
 int iwl_mvm_power_mac_dbgfs_read(struct iwl_mvm *mvm, struct ieee80211_vif *vif,
 				 char *buf, int bufsz);
 
