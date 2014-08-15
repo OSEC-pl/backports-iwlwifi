@@ -335,8 +335,6 @@ struct iwl_lq_sta {
 	bool stbc;              /* Tx STBC is supported by chip and Rx by STA */
 	enum ieee80211_band band;
 
-	struct rs_rate_stats tx_stats[RS_COLUMN_COUNT][IWL_RATE_COUNT];
-
 	/* The following are bitmaps of rates; IWL_RATE_6M_MASK, etc. */
 	unsigned long active_legacy_rate;
 	unsigned long active_siso_rate;
@@ -365,13 +363,14 @@ struct iwl_lq_sta {
 	int tpc_reduce;
 
 	/* persistent fields - initialized only once - keep last! */
-	struct {
+	struct lq_sta_pers {
 #ifdef CPTCFG_MAC80211_DEBUGFS
 		u32 dbg_fixed_rate;
 		u8 dbg_fixed_txp_reduction;
 #endif
 		u8 chains;
 		s8 chain_signal[IEEE80211_MAX_CHAINS];
+		struct rs_rate_stats tx_stats[RS_COLUMN_COUNT][IWL_RATE_COUNT];
 		struct iwl_mvm *drv;
 	} pers;
 };
