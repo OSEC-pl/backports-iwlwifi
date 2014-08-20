@@ -834,6 +834,8 @@ static void iwl_mvm_mac_stop(struct ieee80211_hw *hw)
 	/* the fw is stopped, the aux sta is dead: clean up driver state */
 	iwl_mvm_dealloc_int_sta(mvm, &mvm->aux_sta);
 
+	mvm->ucode_loaded = false;
+
 	mutex_unlock(&mvm->mutex);
 
 	/*
