@@ -144,7 +144,7 @@ static const u8 iwl_nvm_channels_family_8000[] = {
 #define LAST_2GHZ_HT_PLUS		9
 #define LAST_5GHZ_HT			161
 
-#define DEFAULT_MAX_TX_POWER 16
+#define DEFAULT_MAX_TX_POWER 22
 
 /* rate data (static) */
 static struct ieee80211_rate iwl_cfg80211_rates[] = {
