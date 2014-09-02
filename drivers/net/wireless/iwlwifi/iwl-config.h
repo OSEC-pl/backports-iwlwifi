@@ -236,6 +236,7 @@ struct iwl_pwr_tx_backoff {
  * @d0i3: device uses d0i3 instead of d3
  * @nvm_hw_section_num: the ID of the HW NVM section
  * @pwr_tx_backoffs: translation table between power limits and backoffs
+ * @max_tx_agg_size: max TX aggregation size of the ADDBA request/response
  *
  * We enable the driver to be backward compatible wrt. hardware features.
  * API differences in uCode shouldn't be handled here but through TLVs
@@ -270,6 +271,7 @@ struct iwl_cfg {
 	u8   nvm_hw_section_num;
 	bool lp_xtal_workaround;
 	const struct iwl_pwr_tx_backoff *pwr_tx_backoffs;
+	unsigned int max_tx_agg_size;
 };
 
 /*
