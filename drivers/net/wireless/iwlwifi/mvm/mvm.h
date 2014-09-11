@@ -631,6 +631,7 @@ struct iwl_mvm {
 
 	/* -1 for always, 0 for never, >0 for that many times */
 	s8 restart_fw;
+	struct work_struct fw_error_dump_wk;
 	struct iwl_mvm_dump_ptrs *fw_error_dump;
 
 #ifdef CPTCFG_IWLWIFI_LEDS
@@ -1184,6 +1185,13 @@ void iwl_mvm_tcm_work(struct work_struct *work);
 void iwl_mvm_recalc_tcm(struct iwl_mvm *mvm);
 void iwl_mvm_pause_tcm(struct iwl_mvm *mvm);
 void iwl_mvm_resume_tcm(struct iwl_mvm *mvm);
+#endif
+
+void iwl_mvm_nic_restart(struct iwl_mvm *mvm, bool fw_error);
+#ifdef CPTCFG_IWLWIFI_DEBUGFS
+void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm);
+#else
+static inline void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm) {}
 #endif
 
 #endif /* __IWL_MVM_H__ */
