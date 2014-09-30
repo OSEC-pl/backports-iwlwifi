@@ -133,4 +133,8 @@
 #define PCI_SRIOV_CTRL_VFE	0x01	/* VF Enable */
 #endif
 
+#ifndef PCI_EXP_DEVCTL2_LTR_EN
+#define PCI_EXP_DEVCTL2_LTR_EN	0x0400	/* Enable LTR mechanism */
+#endif
+
 #endif /* __BACKPORT_UAPI_PCI_REGS_H */
