@@ -1811,15 +1811,6 @@ __reg_process_hint_user(struct regulatory_request *user_request)
 	if (lr->initiator == NL80211_REGDOM_SET_BY_USER &&
 	    lr->intersect)
 		return REG_REQ_IGNORE;
-	/*
-	 * Process user requests only after previous user/driver/core
-	 * requests have been processed
-	 */
-	if ((lr->initiator == NL80211_REGDOM_SET_BY_CORE ||
-	     lr->initiator == NL80211_REGDOM_SET_BY_DRIVER ||
-	     lr->initiator == NL80211_REGDOM_SET_BY_USER) &&
-	    regdom_changes(lr->alpha2))
-		return REG_REQ_IGNORE;
 
 	if (!regdom_changes(user_request->alpha2))
 		return REG_REQ_ALREADY_SET;
