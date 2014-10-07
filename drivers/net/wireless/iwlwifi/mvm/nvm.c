@@ -608,6 +608,8 @@ exit:
 
 int iwl_mvm_init_mcc(struct iwl_mvm *mvm)
 {
+	const char *alpha2;
+
 	if (!iwl_mvm_is_lar_supported(mvm))
 		return 0;
 
@@ -637,10 +639,13 @@ int iwl_mvm_init_mcc(struct iwl_mvm *mvm)
 	 * Driver regulatory hint for initial update - use the special
 	 * unknown-country "99" code. This will also clear the "custom reg"
 	 * flag and allow regdomain changes. It will happen after init since
-	 * RTNL is required.
+	 * RTNL is required. If an update arrived while the FW was down,
+	 * use the saved one.
 	 * Disallow scans that might crash the FW while the LAR regdomain
 	 * is not set.
 	 */
+	alpha2 = mvm->use_last_alpha2 ? mvm->last_alpha2 : "99";
+	mvm->use_last_alpha2 = false;
 	mvm->lar_regdom_set = false;
-	return regulatory_hint(mvm->hw->wiphy, "99");
+	return regulatory_hint(mvm->hw->wiphy, alpha2);
 }

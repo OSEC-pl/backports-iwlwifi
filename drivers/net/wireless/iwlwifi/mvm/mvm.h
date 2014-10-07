@@ -732,6 +732,10 @@ struct iwl_mvm {
 	struct ieee80211_vif *csa_vif;
 
 	bool lar_regdom_set;
+
+	/* when doing ifup, should we use last_alpha2 for regdom info */
+	bool use_last_alpha2;
+	char last_alpha2[2];
 };
 
 /* Extract MVM priv from op_mode and _hw */

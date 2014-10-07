@@ -307,6 +307,10 @@ static struct ieee80211_regdomain *iwl_mvm_get_regdomain(struct wiphy *wiphy,
 	if (IS_ERR_OR_NULL(resp)) {
 		IWL_DEBUG_LAR(mvm, "Could not get update from FW %d\n",
 			      PTR_RET(resp));
+		/* we will set it later when the FW is up */
+		mvm->last_alpha2[0] = alpha2[0];
+		mvm->last_alpha2[1] = alpha2[1];
+		mvm->use_last_alpha2 = true;
 		goto out_unlock;
 	}
 
