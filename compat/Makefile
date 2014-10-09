@@ -23,3 +23,4 @@ compat-$(CPTCFG_BACKPORT_BUILD_CRYPTO_CCM) += crypto-ccm.o
 compat-$(CPTCFG_BACKPORT_BUILD_DMA_SHARED_HELPERS) += dma-shared-helpers.o
 compat-$(CPTCFG_BACKPORT_BUILD_AVERAGE) += lib-average.o
 compat-$(CPTCFG_BACKPORT_BUILD_CRYPTO_CCM) += crypto-ccm.o
+compat-$(CPTCFG_BACKPORT_BUILD_WANT_DEV_COREDUMP) += drivers-base-devcoredump.o
