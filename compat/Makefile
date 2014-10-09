@@ -41,3 +41,4 @@ obj-$(CPTCFG_BACKPORT_USERSEL_NET_SCH_CODEL) += sch_codel.o
 sch_fq_codel-objs += net-sched-sch_fq_codel.o
 sch_fq_codel-objs += net-core-flow_dissector.o
 obj-$(CPTCFG_BACKPORT_USERSEL_NET_SCH_FQ_CODEL) += sch_fq_codel.o
+compat-$(CPTCFG_BACKPORT_BUILD_WANT_DEV_COREDUMP) += drivers-base-devcoredump.o

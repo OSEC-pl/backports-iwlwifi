@@ -181,3 +181,14 @@ config BACKPORT_USERSEL_BUILD_ALL
 
 	  It's only really useful for compat testing, so
 	  you probably shouldn't enable it.
+
+config BACKPORT_WANT_DEV_COREDUMP
+	bool
+
+config BACKPORT_BUILD_WANT_DEV_COREDUMP
+	bool
+	default n if DEV_COREDUMP
+	default n if DISABLE_DEV_COREDUMP
+	default y if BACKPORT_WANT_DEV_COREDUMP
+	#h-file linux/devcoredump.h
+	#c-file drivers/base/devcoredump.c
