@@ -487,24 +487,6 @@ enum {
 	D0I3_PENDING_WAKEUP,
 };
 
-#ifdef CPTCFG_IWLWIFI_LTE_COEX
-struct lte_coex_state {
-	u8 state;
-
-	bool has_static;
-	bool has_config;
-	bool has_sps;
-	bool has_rprtd_chan;
-	bool has_ft;
-
-	struct iwl_lte_coex_static_params_cmd stat;
-	struct iwl_lte_coex_config_cmd config;
-	struct iwl_lte_coex_sps_cmd sps;
-	struct iwl_lte_coex_wifi_reported_channel_cmd rprtd_chan;
-	struct iwl_lte_coex_fine_tuning_params_cmd ft;
-};
-#endif
-
 #define IWL_MVM_DEBUG_SET_TEMPERATURE_DISABLE 0xff
 #define IWL_MVM_DEBUG_SET_TEMPERATURE_MIN -100
 #define IWL_MVM_DEBUG_SET_TEMPERATURE_MAX 200
