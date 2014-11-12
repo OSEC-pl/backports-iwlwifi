@@ -1128,8 +1128,7 @@ static u8 iwl_mvm_get_key_sta_id(struct ieee80211_vif *vif,
 static int iwl_mvm_send_sta_key(struct iwl_mvm *mvm,
 				struct iwl_mvm_sta *mvm_sta,
 				struct ieee80211_key_conf *keyconf,
-				u8 sta_id, u32 tkip_iv32, u16 *tkip_p1k,
-				u32 cmd_flags)
+				u32 tkip_iv32, u16 *tkip_p1k, u32 cmd_flags)
 {
 	__le16 key_flags;
 	struct iwl_mvm_add_sta_key_cmd cmd = {};
@@ -1137,6 +1136,7 @@ static int iwl_mvm_send_sta_key(struct iwl_mvm *mvm,
 	u16 keyidx;
 	int i;
 	u32 mac_id_n_color = mvm_sta->mac_id_n_color;
+	u8 sta_id = mvm_sta->sta_id;
 
 	keyidx = (keyconf->keyidx << STA_KEY_FLG_KEYID_POS) &
 		 STA_KEY_FLG_KEYID_MSK;
@@ -1253,17 +1253,85 @@ static inline u8 *iwl_mvm_get_mac_addr(struct iwl_mvm *mvm,
 	return NULL;
 }
 
+static int __iwl_mvm_set_sta_key(struct iwl_mvm *mvm,
+				 struct ieee80211_vif *vif,
+				 struct ieee80211_sta *sta,
+				 struct ieee80211_key_conf *keyconf)
+{
+	struct iwl_mvm_sta *mvm_sta = iwl_mvm_sta_from_mac80211(sta);
+	int ret;
+	const u8 *addr;
+	struct ieee80211_key_seq seq;
+	u16 p1k[5];
+
+	switch (keyconf->cipher) {
+	case WLAN_CIPHER_SUITE_TKIP:
+		addr = iwl_mvm_get_mac_addr(mvm, vif, sta);
+		/* get phase 1 key from mac80211 */
+		ieee80211_get_key_rx_seq(keyconf, 0, &seq);
+		ieee80211_get_tkip_rx_p1k(keyconf, addr, seq.tkip.iv32, p1k);
+		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf,
+					   seq.tkip.iv32, p1k, CMD_SYNC);
+		break;
+	case WLAN_CIPHER_SUITE_CCMP:
+		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf,
+					   0, NULL, CMD_SYNC);
+		break;
+	default:
+		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf,
+					   0, NULL, CMD_SYNC);
+	}
+
+	return ret;
+}
+
+static int __iwl_mvm_remove_sta_key(struct iwl_mvm *mvm, u8 sta_id,
+				    struct ieee80211_key_conf *keyconf,
+				    u32 mac_id_n_color)
+{
+	struct iwl_mvm_add_sta_key_cmd cmd = {};
+	__le16 key_flags;
+	int ret;
+	u32 status;
+
+	key_flags = cpu_to_le16((keyconf->keyidx << STA_KEY_FLG_KEYID_POS) &
+				 STA_KEY_FLG_KEYID_MSK);
+	key_flags |= cpu_to_le16(STA_KEY_FLG_NO_ENC | STA_KEY_FLG_WEP_KEY_MAP);
+	key_flags |= cpu_to_le16(STA_KEY_NOT_VALID);
+
+	if (!(keyconf->flags & IEEE80211_KEY_FLAG_PAIRWISE))
+		key_flags |= cpu_to_le16(STA_KEY_MULTICAST);
+
+	cmd.key_flags = key_flags;
+	cmd.key_offset = keyconf->hw_key_idx;
+	cmd.sta_id = sta_id;
+
+	status = ADD_STA_SUCCESS;
+	ret = iwl_mvm_send_add_sta_key_cmd_status(mvm, &cmd,
+						  mac_id_n_color,
+						  &status);
+
+	switch (status) {
+	case ADD_STA_SUCCESS:
+		IWL_DEBUG_WEP(mvm, "MODIFY_STA: remove sta key passed\n");
+		break;
+	default:
+		ret = -EIO;
+		IWL_ERR(mvm, "MODIFY_STA: remove sta key failed\n");
+		break;
+	}
+
+	return ret;
+}
+
 int iwl_mvm_set_sta_key(struct iwl_mvm *mvm,
 			struct ieee80211_vif *vif,
 			struct ieee80211_sta *sta,
 			struct ieee80211_key_conf *keyconf,
 			bool have_key_offset)
 {
-	struct iwl_mvm_sta *mvm_sta;
+	u8 sta_id;
 	int ret;
-	u8 *addr, sta_id;
-	struct ieee80211_key_seq seq;
-	u16 p1k[5];
 
 	lockdep_assert_held(&mvm->mutex);
 
@@ -1292,8 +1360,7 @@ int iwl_mvm_set_sta_key(struct iwl_mvm *mvm,
 		}
 	}
 
-	mvm_sta = (struct iwl_mvm_sta *)sta->drv_priv;
-	if (WARN_ON_ONCE(mvm_sta->vif != vif))
+	if (WARN_ON_ONCE(iwl_mvm_sta_from_mac80211(sta)->vif != vif))
 		return -EINVAL;
 
 	if (!have_key_offset) {
@@ -1307,24 +1374,7 @@ int iwl_mvm_set_sta_key(struct iwl_mvm *mvm,
 			return -ENOSPC;
 	}
 
-	switch (keyconf->cipher) {
-	case WLAN_CIPHER_SUITE_TKIP:
-		addr = iwl_mvm_get_mac_addr(mvm, vif, sta);
-		/* get phase 1 key from mac80211 */
-		ieee80211_get_key_rx_seq(keyconf, 0, &seq);
-		ieee80211_get_tkip_rx_p1k(keyconf, addr, seq.tkip.iv32, p1k);
-		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf, sta_id,
-					   seq.tkip.iv32, p1k, CMD_SYNC);
-		break;
-	case WLAN_CIPHER_SUITE_CCMP:
-		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf, sta_id,
-					   0, NULL, CMD_SYNC);
-		break;
-	default:
-		ret = iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf,
-					   sta_id, 0, NULL, CMD_SYNC);
-	}
-
+	ret = __iwl_mvm_set_sta_key(mvm, vif, sta, keyconf);
 	if (ret)
 		__clear_bit(keyconf->hw_key_idx, mvm->fw_key_table);
 
@@ -1340,10 +1390,6 @@ int iwl_mvm_remove_sta_key(struct iwl_mvm *mvm,
 			   struct ieee80211_sta *sta,
 			   struct ieee80211_key_conf *keyconf)
 {
-	struct iwl_mvm_sta *mvm_sta;
-	struct iwl_mvm_add_sta_key_cmd cmd = {};
-	__le16 key_flags;
-	int ret, status;
 	u8 sta_id;
 
 	lockdep_assert_held(&mvm->mutex);
@@ -1357,8 +1403,7 @@ int iwl_mvm_remove_sta_key(struct iwl_mvm *mvm,
 	if (keyconf->cipher == WLAN_CIPHER_SUITE_AES_CMAC)
 		return iwl_mvm_send_sta_igtk(mvm, keyconf, sta_id, true);
 
-	ret = __test_and_clear_bit(keyconf->hw_key_idx, mvm->fw_key_table);
-	if (!ret) {
+	if (!__test_and_clear_bit(keyconf->hw_key_idx, mvm->fw_key_table)) {
 		IWL_ERR(mvm, "offset %d not used in fw key table.\n",
 			keyconf->hw_key_idx);
 		return -ENOENT;
@@ -1384,38 +1429,11 @@ int iwl_mvm_remove_sta_key(struct iwl_mvm *mvm,
 		}
 	}
 
-	mvm_sta = (struct iwl_mvm_sta *)sta->drv_priv;
-	if (WARN_ON_ONCE(mvm_sta->vif != vif))
+	if (WARN_ON_ONCE(iwl_mvm_sta_from_mac80211(sta)->vif != vif))
 		return -EINVAL;
 
-	key_flags = cpu_to_le16((keyconf->keyidx << STA_KEY_FLG_KEYID_POS) &
-				 STA_KEY_FLG_KEYID_MSK);
-	key_flags |= cpu_to_le16(STA_KEY_FLG_NO_ENC | STA_KEY_FLG_WEP_KEY_MAP);
-	key_flags |= cpu_to_le16(STA_KEY_NOT_VALID);
-
-	if (!(keyconf->flags & IEEE80211_KEY_FLAG_PAIRWISE))
-		key_flags |= cpu_to_le16(STA_KEY_MULTICAST);
-
-	cmd.key_flags = key_flags;
-	cmd.key_offset = keyconf->hw_key_idx;
-	cmd.sta_id = sta_id;
-
-	status = ADD_STA_SUCCESS;
-	ret = iwl_mvm_send_add_sta_key_cmd_status(mvm, &cmd,
-						  mvm_sta->mac_id_n_color,
-						  &status);
-
-	switch (status) {
-	case ADD_STA_SUCCESS:
-		IWL_DEBUG_WEP(mvm, "MODIFY_STA: remove sta key passed\n");
-		break;
-	default:
-		ret = -EIO;
-		IWL_ERR(mvm, "MODIFY_STA: remove sta key failed\n");
-		break;
-	}
-
-	return ret;
+	return __iwl_mvm_remove_sta_key(mvm, sta_id, keyconf,
+			iwl_mvm_sta_from_mac80211(sta)->mac_id_n_color);
 }
 
 void iwl_mvm_update_tkip_key(struct iwl_mvm *mvm,
@@ -1440,8 +1458,8 @@ void iwl_mvm_update_tkip_key(struct iwl_mvm *mvm,
 		}
 	}
 
-	mvm_sta = (void *)sta->drv_priv;
-	iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf, sta_id,
+	mvm_sta = iwl_mvm_sta_from_mac80211(sta);
+	iwl_mvm_send_sta_key(mvm, mvm_sta, keyconf,
 			     iv32, phase1key, CMD_ASYNC);
 	rcu_read_unlock();
 }
