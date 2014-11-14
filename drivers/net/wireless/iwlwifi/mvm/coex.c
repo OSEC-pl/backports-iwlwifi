@@ -1151,9 +1151,6 @@ bool iwl_mvm_bt_coex_is_ant_avail(struct iwl_mvm *mvm, u8 ant)
 	if (mvm->cfg->bt_shared_single_ant)
 		return true;
 
-	if (ant & mvm->cfg->non_shared_ant)
-		return true;
-
 	if (!(mvm->fw->ucode_capa.api[0] & IWL_UCODE_TLV_API_BT_COEX_SPLIT))
 		return iwl_mvm_bt_coex_is_shared_ant_avail_old(mvm);
 
