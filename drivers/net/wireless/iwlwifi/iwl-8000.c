@@ -83,6 +83,9 @@
 
 #define IWL8000_FW_PRE "iwlwifi-8000-"
 #define IWL8000_MODULE_FIRMWARE(api) IWL8000_FW_PRE __stringify(api) ".ucode"
+/* DCCM offsets and lengths */
+#define IWL8260_DCCM_OFFSET		0x800000
+#define IWL8260_DCCM_LEN		0x18000
 
 #define NVM_HW_SECTION_NUM_FAMILY_8000		10
 
@@ -111,7 +114,10 @@ static const struct iwl_ht_params iwl8000_ht_params = {
 	.max_data_size = IWL60_RTC_DATA_SIZE,			\
 	.base_params = &iwl8000_base_params,			\
 	.led_mode = IWL_LED_RF_STATE,				\
-	.nvm_hw_section_num = NVM_HW_SECTION_NUM_FAMILY_8000
+	.nvm_hw_section_num = NVM_HW_SECTION_NUM_FAMILY_8000,	\
+	.dccm_offset = IWL8260_DCCM_OFFSET,			\
+	.dccm_len = IWL8260_DCCM_LEN
+
 
 const struct iwl_cfg iwl8260_2ac_cfg = {
 	.name = "Intel(R) Dual Band Wireless AC 8260",
