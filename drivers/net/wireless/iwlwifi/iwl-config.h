@@ -239,6 +239,8 @@ struct iwl_pwr_tx_backoff {
  * @max_tx_agg_size: max TX aggregation size of the ADDBA request/response
  * @dccm_offset: offset from which DCCM begins
  * @dccm_len: length of DCCM (including runtime stack CCM)
+ * @smem_offset: offset from which the SMEM begins
+ * @smem_len: the length of SMEM
  *
  * We enable the driver to be backward compatible wrt. hardware features.
  * API differences in uCode shouldn't be handled here but through TLVs
@@ -276,6 +278,8 @@ struct iwl_cfg {
 	unsigned int max_tx_agg_size;
 	const u32 dccm_offset;
 	const u32 dccm_len;
+	const u32 smem_offset;
+	const u32 smem_len;
 };
 
 /*

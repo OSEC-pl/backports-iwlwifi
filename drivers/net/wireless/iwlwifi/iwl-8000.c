@@ -83,9 +83,11 @@
 
 #define IWL8000_FW_PRE "iwlwifi-8000-"
 #define IWL8000_MODULE_FIRMWARE(api) IWL8000_FW_PRE __stringify(api) ".ucode"
-/* DCCM offsets and lengths */
+/* Memory offsets and lengths */
 #define IWL8260_DCCM_OFFSET		0x800000
 #define IWL8260_DCCM_LEN		0x18000
+#define IWL8260_SMEM_OFFSET		0x400000
+#define IWL8260_SMEM_LEN		0x68000
 
 #define NVM_HW_SECTION_NUM_FAMILY_8000		10
 
@@ -116,7 +118,9 @@ static const struct iwl_ht_params iwl8000_ht_params = {
 	.led_mode = IWL_LED_RF_STATE,				\
 	.nvm_hw_section_num = NVM_HW_SECTION_NUM_FAMILY_8000,	\
 	.dccm_offset = IWL8260_DCCM_OFFSET,			\
-	.dccm_len = IWL8260_DCCM_LEN
+	.dccm_len = IWL8260_DCCM_LEN,				\
+	.smem_offset = IWL8260_SMEM_OFFSET,			\
+	.smem_len = IWL8260_SMEM_LEN
 
 
 const struct iwl_cfg iwl8260_2ac_cfg = {
