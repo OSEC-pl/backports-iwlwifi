@@ -1194,4 +1194,7 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm);
 static inline void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm) {}
 #endif
 
+int iwl_mvm_start_fw_dbg_conf(struct iwl_mvm *mvm, enum iwl_fw_dbg_conf id);
+void iwl_mvm_fw_dbg_collect(struct iwl_mvm *mvm);
+
 #endif /* __IWL_MVM_H__ */
