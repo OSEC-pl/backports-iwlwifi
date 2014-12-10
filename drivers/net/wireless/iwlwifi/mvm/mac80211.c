@@ -749,6 +749,11 @@ static void iwl_mvm_cleanup_iterator(void *data, u8 *mac,
 
 static void iwl_mvm_restart_cleanup(struct iwl_mvm *mvm)
 {
+	/* cleanup all stale references (scan, roc), but keep the
+	 * ucode_down ref until reconfig is complete
+	 */
+	iwl_mvm_unref_all_except(mvm, IWL_MVM_REF_UCODE_DOWN);
+
 	iwl_trans_stop_device(mvm->trans);
 
 	mvm->scan_status = IWL_MVM_SCAN_NONE;
@@ -771,10 +776,6 @@ static void iwl_mvm_restart_cleanup(struct iwl_mvm *mvm)
 	mvm->bt_kill_msk =  0;
 
 	ieee80211_wake_queues(mvm->hw);
-
-	/* cleanup all stale references (scan, roc), but keep the
-	 * ucode_down ref until reconfig is complete */
-	iwl_mvm_unref_all_except(mvm, IWL_MVM_REF_UCODE_DOWN);
 
 	/* clear any stale d0i3 state */
 	clear_bit(IWL_MVM_STATUS_IN_D0I3, &mvm->status);
