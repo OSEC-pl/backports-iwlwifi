@@ -73,6 +73,7 @@
 
 static void iwl_mvm_enter_ctkill(struct iwl_mvm *mvm)
 {
+	struct iwl_mvm_tt_mgmt *tt = &mvm->thermal_throttle;
 	u32 duration = mvm->thermal_throttle.params->ct_kill_duration;
 
 	if (test_bit(IWL_MVM_STATUS_HW_CTKILL, &mvm->status))
@@ -81,12 +82,15 @@ static void iwl_mvm_enter_ctkill(struct iwl_mvm *mvm)
 	IWL_ERR(mvm, "Enter CT Kill\n");
 	iwl_mvm_set_hw_ctkill_state(mvm, true);
 
+	tt->throttle = false;
+	tt->dynamic_smps = false;
+
 	/* Don't schedule an exit work if we're in test mode, since
 	 * the temperature will not change unless we manually set it
 	 * again (or disable testing).
 	 */
 	if (!mvm->temperature_test)
-		schedule_delayed_work(&mvm->thermal_throttle.ct_kill_exit,
+		schedule_delayed_work(&tt->ct_kill_exit,
 				      round_jiffies_relative(duration * HZ));
 }
 
@@ -457,6 +461,7 @@ void iwl_mvm_tt_initialize(struct iwl_mvm *mvm, u32 min_backoff)
 		tt->params = &iwl7000_tt_params;
 
 	tt->throttle = false;
+	tt->dynamic_smps = false;
 	tt->min_backoff = min_backoff;
 	INIT_DELAYED_WORK(&tt->ct_kill_exit, check_exit_ctkill);
 }
