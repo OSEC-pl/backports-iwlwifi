@@ -1365,7 +1365,6 @@ static void iwl_req_fw_callback(const struct firmware *ucode_raw, void *context)
 	release_firmware(ucode_raw);
 	if (iwl_request_firmware(drv, false))
 		goto out_unbind;
-	kfree(pieces);
 	return;
 
  out_free_fw:
