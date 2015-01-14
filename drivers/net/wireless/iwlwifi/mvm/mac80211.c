@@ -807,6 +807,9 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 	int reg_val;
 	u32 smem_len = mvm->cfg->smem_len;
 
+	if (!IWL_MVM_COLLECT_FW_ERR_DUMP)
+		return;
+
 	lockdep_assert_held(&mvm->mutex);
 
 	fw_error_dump = kzalloc(sizeof(*fw_error_dump), GFP_KERNEL);

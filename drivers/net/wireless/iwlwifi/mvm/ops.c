@@ -917,7 +917,8 @@ static void iwl_mvm_nic_error(struct iwl_op_mode *op_mode)
 {
 	struct iwl_mvm *mvm = IWL_OP_MODE_GET_MVM(op_mode);
 
-	iwl_mvm_dump_nic_error_log(mvm);
+	if (IWL_MVM_COLLECT_FW_ERR_DUMP)
+		iwl_mvm_dump_nic_error_log(mvm);
 
 #ifdef CPTCFG_IWLWIFI_DEVICE_TESTMODE
 	iwl_dnt_dispatch_handle_nic_err(mvm->trans);
