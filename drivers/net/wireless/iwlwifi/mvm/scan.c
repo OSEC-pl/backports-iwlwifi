@@ -271,11 +271,10 @@ static void iwl_mvm_scan_condition_iterator(void *data, u8 *mac,
 					    struct ieee80211_vif *vif)
 {
 	struct iwl_mvm_vif *mvmvif = iwl_mvm_vif_from_mac80211(vif);
-	int *global_cnt = data;
+	bool *global_bound = data;
 
-	if (vif->type != NL80211_IFTYPE_P2P_DEVICE && mvmvif->phy_ctxt &&
-	    mvmvif->phy_ctxt->id < MAX_PHYS)
-		*global_cnt += 1;
+	if (mvmvif->phy_ctxt && mvmvif->phy_ctxt->id < MAX_PHYS)
+		*global_bound = true;
 }
 
 static void iwl_mvm_scan_calc_params(struct iwl_mvm *mvm,
@@ -283,16 +282,16 @@ static void iwl_mvm_scan_calc_params(struct iwl_mvm *mvm,
 				     int n_ssids, u32 flags,
 				     struct iwl_mvm_scan_params *params)
 {
-	int global_cnt = 0;
+	bool global_bound = false;
 	enum ieee80211_band band;
 	u8 frag_passive_dwell = 0;
 
 	ieee80211_iterate_active_interfaces_atomic(mvm->hw,
 					    IEEE80211_IFACE_ITER_NORMAL,
 					    iwl_mvm_scan_condition_iterator,
-					    &global_cnt);
+					    &global_bound);
 
-	if (!global_cnt)
+	if (!global_bound)
 		goto not_bound;
 
 #ifdef CPTCFG_IWLMVM_TCM
@@ -318,31 +317,16 @@ static void iwl_mvm_scan_calc_params(struct iwl_mvm *mvm,
 			break;
 		}
 	case IWL_MVM_VENDOR_LOAD_MEDIUM:
-		if (CPTCFG_IWLMVM_SCAN_PRECEDENCE_LEVEL == 1) {
-			params->suspend_time = 250;
-			params->max_out_time = 250;
-		} else {
-			params->suspend_time = 120;
-			params->max_out_time = 120;
-		}
+		params->suspend_time = 120;
+		params->max_out_time = 120;
 		break;
 	default:
-		if (CPTCFG_IWLMVM_SCAN_PRECEDENCE_LEVEL == 1) {
-			params->suspend_time = 100;
-			params->max_out_time = 600;
-		} else {
-			params->suspend_time = 30;
-			params->max_out_time = 170;
-		}
-	}
-#else
-	if (CPTCFG_IWLMVM_SCAN_PRECEDENCE_LEVEL == 1) {
-		params->suspend_time = 100;
-		params->max_out_time = 600;
-	} else {
 		params->suspend_time = 30;
 		params->max_out_time = 170;
 	}
+#else
+	params->suspend_time = 30;
+	params->max_out_time = 170;
 #endif
 
 	if (iwl_mvm_low_latency(mvm)) {
@@ -357,11 +341,7 @@ static void iwl_mvm_scan_calc_params(struct iwl_mvm *mvm,
 			params->suspend_time = 105;
 #endif
 			params->max_out_time = 70;
-			/*
-			 * If there is more than one active interface make
-			 * passive scan more fragmented.
-			 */
-			frag_passive_dwell = (global_cnt < 2) ? 40 : 20;
+			frag_passive_dwell = 20;
 		} else {
 			params->suspend_time = 120;
 			params->max_out_time = 120;
