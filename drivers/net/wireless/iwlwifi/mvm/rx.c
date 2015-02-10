@@ -583,6 +583,35 @@ static void iwl_mvm_stat_iterator(void *_data, u8 *mac,
 	}
 }
 
+static inline void
+iwl_mvm_rx_stats_check_trigger(struct iwl_mvm *mvm, struct iwl_rx_packet *pkt)
+{
+	struct iwl_fw_dbg_trigger_tlv *trig;
+	struct iwl_fw_dbg_trigger_stats *trig_stats;
+	u32 trig_offset, trig_thold;
+
+	if (!iwl_fw_dbg_trigger_enabled(mvm->fw, FW_DBG_TRIGGER_STATS))
+		return;
+
+	trig = iwl_fw_dbg_get_trigger(mvm->fw, FW_DBG_TRIGGER_STATS);
+	trig_stats = (void *)trig->data;
+
+	if (!iwl_fw_dbg_trigger_check_stop(mvm, NULL, trig))
+		return;
+
+	trig_offset = le32_to_cpu(trig_stats->stop_offset);
+	trig_thold = le32_to_cpu(trig_stats->stop_threshold);
+
+	if (WARN_ON_ONCE(trig_offset >= iwl_rx_packet_payload_len(pkt)))
+		return;
+
+	if (le32_to_cpup((__le32 *) (pkt->data + trig_offset)) < trig_thold)
+		return;
+
+	iwl_mvm_fw_dbg_collect_trig(mvm, trig, NULL, 0);
+}
+
+
 /*
  * iwl_mvm_rx_statistics - STATISTICS_NOTIFICATION handler
  *
@@ -603,6 +632,7 @@ int iwl_mvm_rx_statistics(struct iwl_mvm *mvm,
 	iwl_mvm_tt_temp_changed(mvm, le32_to_cpu(common->temperature));
 
 	iwl_mvm_update_rx_statistics(mvm, stats);
+	iwl_mvm_rx_stats_check_trigger(mvm, pkt);
 
 	ieee80211_iterate_active_interfaces(mvm->hw,
 					    IEEE80211_IFACE_ITER_NORMAL,
