@@ -561,13 +561,14 @@ void ieee80211_flush_queues(struct ieee80211_local *local,
 					IEEE80211_QUEUE_STOP_REASON_FLUSH);
 }
 
-static void __iterate_active_interfaces(struct ieee80211_local *local,
-					u32 iter_flags,
-					void (*iterator)(void *data, u8 *mac,
-						struct ieee80211_vif *vif),
-					void *data)
+static void __iterate_interfaces(struct ieee80211_local *local,
+				 u32 iter_flags,
+				 void (*iterator)(void *data, u8 *mac,
+						  struct ieee80211_vif *vif),
+				 void *data)
 {
 	struct ieee80211_sub_if_data *sdata;
+	bool active_only = iter_flags & IEEE80211_IFACE_ITER_ACTIVE;
 
 	list_for_each_entry_rcu(sdata, &local->interfaces, list) {
 		switch (sdata->vif.type) {
@@ -581,9 +582,9 @@ static void __iterate_active_interfaces(struct ieee80211_local *local,
 			break;
 		}
 		if (!(iter_flags & IEEE80211_IFACE_ITER_RESUME_ALL) &&
-		    !(sdata->flags & IEEE80211_SDATA_IN_DRIVER))
+		    active_only && !(sdata->flags & IEEE80211_SDATA_IN_DRIVER))
 			continue;
-		if (ieee80211_sdata_running(sdata))
+		if (ieee80211_sdata_running(sdata) || !active_only)
 			iterator(data, sdata->vif.addr,
 				 &sdata->vif);
 	}
@@ -592,12 +593,12 @@ static void __iterate_active_interfaces(struct ieee80211_local *local,
 				      lockdep_is_held(&local->iflist_mtx) ||
 				      lockdep_rtnl_is_held());
 	if (sdata &&
-	    (iter_flags & IEEE80211_IFACE_ITER_RESUME_ALL ||
+	    (iter_flags & IEEE80211_IFACE_ITER_RESUME_ALL || !active_only ||
 	     sdata->flags & IEEE80211_SDATA_IN_DRIVER))
 		iterator(data, sdata->vif.addr, &sdata->vif);
 }
 
-void ieee80211_iterate_active_interfaces(
+void ieee80211_iterate_interfaces(
 	struct ieee80211_hw *hw, u32 iter_flags,
 	void (*iterator)(void *data, u8 *mac,
 			 struct ieee80211_vif *vif),
@@ -606,10 +607,10 @@ void ieee80211_iterate_active_interfaces(
 	struct ieee80211_local *local = hw_to_local(hw);
 
 	mutex_lock(&local->iflist_mtx);
-	__iterate_active_interfaces(local, iter_flags, iterator, data);
+	__iterate_interfaces(local, iter_flags, iterator, data);
 	mutex_unlock(&local->iflist_mtx);
 }
-EXPORT_SYMBOL_GPL(ieee80211_iterate_active_interfaces);
+EXPORT_SYMBOL_GPL(ieee80211_iterate_interfaces);
 
 void ieee80211_iterate_active_interfaces_atomic(
 	struct ieee80211_hw *hw, u32 iter_flags,
@@ -620,7 +621,8 @@ void ieee80211_iterate_active_interfaces_atomic(
 	struct ieee80211_local *local = hw_to_local(hw);
 
 	rcu_read_lock();
-	__iterate_active_interfaces(local, iter_flags, iterator, data);
+	__iterate_interfaces(local, iter_flags | IEEE80211_IFACE_ITER_ACTIVE,
+			     iterator, data);
 	rcu_read_unlock();
 }
 EXPORT_SYMBOL_GPL(ieee80211_iterate_active_interfaces_atomic);
@@ -635,7 +637,8 @@ void ieee80211_iterate_active_interfaces_rtnl(
 
 	ASSERT_RTNL();
 
-	__iterate_active_interfaces(local, iter_flags, iterator, data);
+	__iterate_interfaces(local, iter_flags | IEEE80211_IFACE_ITER_ACTIVE,
+			     iterator, data);
 }
 EXPORT_SYMBOL_GPL(ieee80211_iterate_active_interfaces_rtnl);
 
