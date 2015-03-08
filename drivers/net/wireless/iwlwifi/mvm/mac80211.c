@@ -1871,8 +1871,7 @@ static int iwl_mvm_start_ap_ibss(struct ieee80211_hw *hw,
 
 	iwl_mvm_bt_coex_vif_change(mvm);
 
-	mutex_unlock(&mvm->mutex);
-	return 0;
+	goto out_unlock;
 
 out_quota_failed:
 	iwl_mvm_power_update_mac(mvm, vif);
