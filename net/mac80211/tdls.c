@@ -127,6 +127,24 @@ ieee80211_tdls_add_supp_channels(struct ieee80211_sub_if_data *sdata,
 	*pos = 2 * subband_cnt;
 }
 
+static void ieee80211_tdls_add_oper_classes(struct ieee80211_sub_if_data *sdata,
+					    struct sk_buff *skb)
+{
+	u8 *pos;
+	u8 op_class;
+
+	if (!ieee80211_chandef_to_operating_class(&sdata->vif.bss_conf.chandef,
+						  &op_class))
+		return;
+
+	pos = skb_put(skb, 4);
+	*pos++ = WLAN_EID_SUPPORTED_REGULATORY_CLASSES;
+	*pos++ = 2; /* len */
+
+	*pos++ = op_class;
+	*pos++ = op_class; /* give current operating class as alternate too */
+}
+
 static void ieee80211_tdls_add_bss_coex_ie(struct sk_buff *skb)
 {
 	u8 *pos = (void *)skb_put(skb, 3);
@@ -328,6 +346,8 @@ ieee80211_tdls_add_setup_start_ies(struct ieee80211_sub_if_data *sdata,
 		memcpy(pos, extra_ies + offset, noffset - offset);
 		offset = noffset;
 	}
+
+	ieee80211_tdls_add_oper_classes(sdata, skb);
 
 	/*
 	 * with TDLS we can switch channels, and HT-caps are not necessarily
@@ -701,6 +721,7 @@ ieee80211_tdls_build_mgmt_packet_data(struct ieee80211_sub_if_data *sdata,
 				       sizeof(struct ieee80211_ht_operation)) +
 			       50 + /* supported channels */
 			       3 + /* 40/20 BSS coex */
+			       4 + /* oper classes */
 			       extra_ies_len +
 			       sizeof(struct ieee80211_tdls_lnkie));
 	if (!skb)
