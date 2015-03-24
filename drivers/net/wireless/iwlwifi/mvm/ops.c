@@ -560,12 +560,11 @@ iwl_op_mode_mvm_start(struct iwl_trans *trans, const struct iwl_cfg *cfg,
 	/* set the nvm_file_name according to priority */
 	if (iwlwifi_mod_params.nvm_file) {
 		mvm->nvm_file_name = iwlwifi_mod_params.nvm_file;
-	} else {
-		if ((trans->cfg->device_family == IWL_DEVICE_FAMILY_8000) &&
-		    (CSR_HW_REV_STEP(trans->hw_rev) == SILICON_A_STEP))
-			mvm->nvm_file_name = mvm->cfg->default_nvm_file_8000A;
+	} else if (trans->cfg->device_family == IWL_DEVICE_FAMILY_8000) {
+		if (CSR_HW_REV_STEP(trans->hw_rev) == SILICON_B_STEP)
+			mvm->nvm_file_name = mvm->cfg->default_nvm_file_B_step;
 		else
-			mvm->nvm_file_name = mvm->cfg->default_nvm_file;
+			mvm->nvm_file_name = mvm->cfg->default_nvm_file_C_step;
 	}
 
 	if (WARN(cfg->no_power_up_nic_in_init && !mvm->nvm_file_name,
