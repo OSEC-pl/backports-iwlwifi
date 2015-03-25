@@ -1379,12 +1379,9 @@ static int iwl_trans_sdio_start_hw(struct iwl_trans *trans)
 		}
 	}
 
-	/* Enable the retention for B step */
-	if (CSR_HW_REV_STEP(trans->hw_rev) == SILICON_B_STEP) {
-		ret = iwl_sdio_enter_retention_flow(trans);
-		if (ret)
-			goto release_hw;
-	}
+	ret = iwl_sdio_enter_retention_flow(trans);
+	if (ret)
+		goto release_hw;
 
 	/* Configure the SDTM  and ADMA in the SDIO AL */
 	ret = iwl_sdio_config_sdtm(trans);
