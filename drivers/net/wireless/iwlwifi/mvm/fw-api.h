@@ -99,6 +99,8 @@ enum {
 	DBG_CFG = 0x9,
 	ANTENNA_COUPLING_NOTIFICATION = 0xa,
 
+	CONTINUOUS_REC_CHUNK_NOTIF = 0x11,
+
 	/* station table */
 	ADD_STA_KEY = 0x17,
 	ADD_STA = 0x18,
