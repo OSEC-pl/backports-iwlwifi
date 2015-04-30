@@ -750,6 +750,9 @@ void iwl_init_ht_hw_capab(const struct iwl_cfg *cfg,
 		return;
 	}
 
+	if (data->sku_cap_mimo_disabled)
+		rx_chains = 1;
+
 	ht_info->ht_supported = true;
 	ht_info->cap = IEEE80211_HT_CAP_DSSSCCK40;
 
