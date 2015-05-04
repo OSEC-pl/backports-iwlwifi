@@ -2,5 +2,5 @@ BACKPORTS_VERSION="(see git)"
 BACKPORTED_KERNEL_VERSION="(see git)"
 BACKPORTED_KERNEL_NAME="iwlwifi"
 BACKPORTS_BUILD_TSTAMP=__DATE__ \" \" __TIME__
-BACKPORTS_GIT_TRACKED="iwlwifi-stack-public:release/LinuxCore11:4238:56498cbd"
+BACKPORTS_GIT_TRACKED="iwlwifi-stack-public:release/LinuxCore11:4239:ffebd769"
 BACKPORTS_BRANCH_TSTAMP="Apr 21 2015 18:12:16"
