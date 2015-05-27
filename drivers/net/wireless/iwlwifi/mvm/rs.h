@@ -1,6 +1,7 @@
 /******************************************************************************
  *
  * Copyright(c) 2003 - 2014 Intel Corporation. All rights reserved.
+ * Copyright(c) 2015 Intel Mobile Communications GmbH
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of version 2 of the GNU General Public License as
@@ -345,6 +346,14 @@ struct iwl_lq_sta {
 	u8 max_siso_rate_idx;
 	u8 max_mimo2_rate_idx;
 
+	/* Optimal rate based on RSSI and STA caps.
+	 * Used only to reflect link speed to userspace.
+	 */
+	struct rs_rate optimal_rate;
+	unsigned long optimal_rate_mask;
+	const struct rs_init_rate_info *optimal_rates;
+	int optimal_nentries;
+
 	u8 missed_rate_counter;
 
 	struct iwl_lq_cmd lq;
@@ -374,6 +383,8 @@ struct iwl_lq_sta {
 #endif
 		u8 chains;
 		s8 chain_signal[IEEE80211_MAX_CHAINS];
+		s8 last_rssi;
+
 		struct iwl_mvm *drv;
 	} pers;
 };
