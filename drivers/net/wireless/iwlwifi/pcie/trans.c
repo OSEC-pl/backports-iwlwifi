@@ -2745,7 +2745,8 @@ struct iwl_trans *iwl_trans_pcie_alloc(struct pci_dev *pdev,
 		goto out_pci_disable_msi;
 	}
 
-	if (iwl_pcie_alloc_ict(trans))
+	ret = iwl_pcie_alloc_ict(trans);
+	if (ret)
 		goto out_free_cmd_pool;
 
 	ret = request_threaded_irq(pdev->irq, iwl_pcie_isr,
