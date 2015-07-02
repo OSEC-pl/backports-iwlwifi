@@ -3291,21 +3291,30 @@ static int ieee80211_probe_auth(struct ieee80211_sub_if_data *sdata)
 	auth_data->tries++;
 
 	if (auth_data->tries > IEEE80211_AUTH_MAX_TRIES) {
-		sdata_info(sdata, "authentication with %pM timed out\n",
-			   auth_data->bss->bssid);
+		if (!auth_data->bss->proberesp_ies && !auth_data->skip_probe) {
+			/*
+			 * Seems like the AP does not respond to probe requests,
+			 * so try authentication without probe response IEs.
+			 */
+			auth_data->tries = 1;
+			auth_data->skip_probe = true;
+		} else {
+			sdata_info(sdata, "authentication with %pM timed out\n",
+				   auth_data->bss->bssid);
 
-		/*
-		 * Most likely AP is not in the range so remove the
-		 * bss struct for that AP.
-		 */
-		cfg80211_unlink_bss(local->hw.wiphy, auth_data->bss);
+			/*
+			 * Most likely AP is not in the range so remove the
+			 * bss struct for that AP.
+			 */
+			cfg80211_unlink_bss(local->hw.wiphy, auth_data->bss);
 
-		return -ETIMEDOUT;
+			return -ETIMEDOUT;
+		}
 	}
 
 	drv_mgd_prepare_tx(local, sdata);
 
-	if (auth_data->bss->proberesp_ies) {
+	if (auth_data->bss->proberesp_ies || auth_data->skip_probe) {
 		u16 trans = 1;
 		u16 status = 0;
 

@@ -348,6 +348,7 @@ struct ieee80211_mgd_auth_data {
 	struct cfg80211_bss *bss;
 	unsigned long timeout;
 	int tries;
+	bool skip_probe;
 	u16 algorithm, expected_transaction;
 
 	u8 key[WLAN_KEY_LEN_WEP104];
