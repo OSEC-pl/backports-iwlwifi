@@ -323,8 +323,12 @@ static struct ieee80211_regdomain *iwl_mvm_get_regdomain(struct wiphy *wiphy,
 
 	mutex_lock(&mvm->mutex);
 
-	/* change "99" to "ZZ" for the FW */
-	if (alpha2[0] == '9' && alpha2[1] == '9')
+	/*
+	 * change "99" and "00" to "ZZ" for the FW - the regulatory code is
+	 * ok with accepting a different alpha2 in return for these cases.
+	 */
+	if ((alpha2[0] == '9' && alpha2[1] == '9') ||
+	    (alpha2[0] == '0' && alpha2[1] == '0'))
 		alpha2 = "ZZ";
 
 	resp = iwl_mvm_update_mcc(mvm, alpha2);
