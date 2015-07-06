@@ -600,7 +600,7 @@ bool reg_is_valid_request(const char *alpha2)
 		return false;
 
 	return alpha2_equal(lr->alpha2, alpha2) ||
-	       is_unknown_alpha2(lr->alpha2);
+	       is_unknown_alpha2(lr->alpha2) || is_world_regdom(lr->alpha2);
 }
 
 static const struct ieee80211_regdomain *reg_get_regdomain(struct wiphy *wiphy)
