@@ -339,6 +339,7 @@ void ieee80211_process_addba_request(struct ieee80211_local *local,
 	tid_agg_rx->buf_size = buf_size;
 	tid_agg_rx->timeout = timeout;
 	tid_agg_rx->stored_mpdu_num = 0;
+	tid_agg_rx->reorder_buf_filtered = 0;
 	status = WLAN_STATUS_SUCCESS;
 
 	/* activate it for RX */
