@@ -164,8 +164,8 @@ static void iwl_mvm_scan_fill_ssids(struct iwl_scan_cmd *cmd,
 static u16 iwl_mvm_get_active_dwell(enum ieee80211_band band, int n_ssids)
 {
 	if (band == IEEE80211_BAND_2GHZ)
-		return 30  + 3 * (n_ssids + 1);
-	return 20  + 2 * (n_ssids + 1);
+		return 20  + 3 * (n_ssids + 1);
+	return 10  + 2 * (n_ssids + 1);
 }
 
 static u16 iwl_mvm_get_passive_dwell(enum ieee80211_band band)
@@ -188,11 +188,19 @@ static void iwl_mvm_scan_fill_channels(struct iwl_scan_cmd *cmd,
 		type |= BIT(req->n_ssids);
 
 	for (i = 0; i < cmd->channel_count; i++) {
+		u16 active_dwell = params->dwell[band].active;
+
+		/* Increase dwell time on channels 1, 6 and 11 */
+		if (req->channels[i]->center_freq == 2412 ||
+		    req->channels[i]->center_freq == 2437 ||
+		    req->channels[i]->center_freq == 2462)
+			active_dwell += 70;
+
 		chan->channel = cpu_to_le16(req->channels[i]->hw_value);
 		chan->type = cpu_to_le32(type);
 		if (req->channels[i]->flags & IEEE80211_CHAN_NO_IR)
 			chan->type &= cpu_to_le32(~SCAN_CHANNEL_TYPE_ACTIVE);
-		chan->active_dwell = cpu_to_le16(params->dwell[band].active);
+		chan->active_dwell = cpu_to_le16(active_dwell);
 		chan->passive_dwell = cpu_to_le16(params->dwell[band].passive);
 		chan->iteration_count = cpu_to_le16(1);
 		chan++;
@@ -708,6 +716,11 @@ static void iwl_build_channel_cfg(struct iwl_mvm *mvm,
 		channels->channel_number[index] = cpu_to_le16(chan->hw_value);
 		channels->dwell_time[index][0] = params->dwell[band].active;
 		channels->dwell_time[index][1] = params->dwell[band].passive;
+
+		/* Increase dwell time on channels 1, 6 and 11 */
+		if (chan->center_freq == 2412 || chan->center_freq == 2437 ||
+		    chan->center_freq == 2462)
+			channels->dwell_time[index][0] += 70;
 
 		channels->iter_count[index] = cpu_to_le16(1);
 		channels->iter_interval[index] = 0;
