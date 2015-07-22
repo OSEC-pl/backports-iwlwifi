@@ -250,6 +250,9 @@ static const struct iwl_rx_handlers iwl_mvm_rx_handlers[] = {
 	RX_HANDLER(ANTENNA_COUPLING_NOTIFICATION,
 		   iwl_mvm_rx_ant_coupling_notif, true),
 
+	RX_HANDLER(BA_WINDOW_STATUS_NOTIFICATION_ID,
+		   iwl_mvm_window_status_notif, false),
+
 	RX_HANDLER(TIME_EVENT_NOTIFICATION, iwl_mvm_rx_time_event_notif, false),
 	RX_HANDLER(MCC_CHUB_UPDATE_CMD, iwl_mvm_rx_chub_update_mcc, true),
 
@@ -393,6 +396,7 @@ static const char *const iwl_mvm_cmd_strings[REPLY_MAX + 1] = {
 	CMD(MCC_UPDATE_CMD),
 	CMD(SCAN_ITERATION_COMPLETE_UMAC),
 	CMD(LDBG_CONFIG_CMD),
+	CMD(BA_WINDOW_STATUS_NOTIFICATION_ID),
 };
 #undef CMD
 
