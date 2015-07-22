@@ -563,3 +563,54 @@ int iwl_mvm_rx_statistics(struct iwl_mvm *mvm,
 					    &data);
 	return 0;
 }
+
+int iwl_mvm_window_status_notif(struct iwl_mvm *mvm,
+				struct iwl_rx_cmd_buffer *rxb,
+				struct iwl_device_cmd *cmd)
+{
+	struct iwl_rx_packet *pkt = rxb_addr(rxb);
+	struct iwl_ba_window_status_notif *notif = (void *)pkt->data;
+	int i;
+	u32 pkt_len = iwl_rx_packet_payload_len(pkt);
+
+	if (pkt_len != sizeof(*notif)) {
+		WARN_ONCE(1,
+			  "Received window status notification of wrong size\n");
+		return 0;
+	}
+
+	rcu_read_lock();
+	for (i = 0; i < BA_WINDOW_STREAMS_MAX; i++) {
+		struct ieee80211_sta *sta;
+		u8 sta_id, tid;
+		u64 bitmap;
+		u32 ssn;
+		u16 ratid;
+		u16 received_mpdu;
+
+		ratid = le16_to_cpu(notif->ra_tid[i]);
+
+		/* check that this TID is valid */
+		if (!(ratid & BA_WINDOW_STATUS_VALID_MSK))
+			continue;
+
+		tid = ratid & BA_WINDOW_STATUS_TID_MSK;
+
+		/* get the station */
+		sta_id = (ratid & BA_WINDOW_STATUS_STA_ID_MSK)
+			 >> BA_WINDOW_STATUS_STA_ID_POS;
+		sta = rcu_dereference(mvm->fw_id_to_mac_id[sta_id]);
+		if (IS_ERR_OR_NULL(sta))
+			continue;
+
+		bitmap = le64_to_cpu(notif->bitmap[i]);
+		ssn = le32_to_cpu(notif->start_seq_num[i]);
+		received_mpdu = le16_to_cpu(notif->mpdu_rx_count[i]);
+
+		/* update mac80211 with the bitmap for the reordering buffer */
+		ieee80211_mark_rx_ba_filtered_frames(sta, tid, ssn, bitmap,
+						     received_mpdu);
+	}
+	rcu_read_unlock();
+	return 0;
+}

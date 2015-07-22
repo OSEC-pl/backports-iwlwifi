@@ -931,6 +931,10 @@ int iwl_mvm_rx_beacon_notif(struct iwl_mvm *mvm,
 int iwl_mvm_rx_missed_beacons_notif(struct iwl_mvm *mvm,
 				    struct iwl_rx_cmd_buffer *rxb,
 				    struct iwl_device_cmd *cmd);
+int iwl_mvm_window_status_notif(struct iwl_mvm *mvm,
+				struct iwl_rx_cmd_buffer *rxb,
+				struct iwl_device_cmd *cmd);
+
 void iwl_mvm_mac_ctxt_recalc_tsf_id(struct iwl_mvm *mvm,
 				    struct ieee80211_vif *vif);
 int iwl_mvm_mac_ctxt_cmd_ap(struct iwl_mvm *mvm,

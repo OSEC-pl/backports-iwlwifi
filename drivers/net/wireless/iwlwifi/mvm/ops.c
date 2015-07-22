@@ -271,6 +271,9 @@ static const struct iwl_rx_handlers iwl_mvm_rx_handlers[] = {
 		   iwl_mvm_power_uapsd_misbehaving_ap_notif, false),
 	RX_HANDLER(DTS_MEASUREMENT_NOTIFICATION, iwl_mvm_temp_notif, true),
 
+	RX_HANDLER(BA_WINDOW_STATUS_NOTIFICATION_ID,
+		   iwl_mvm_window_status_notif, false),
+
 #ifdef CPTCFG_IWLWIFI_DEVICE_TESTMODE
 	RX_HANDLER(DEBUG_LOG_MSG, iwl_mvm_rx_fw_logs, false),
 	RX_HANDLER(MONITOR_DATA_OVER_IDI_NOTIFICATION, iwl_mvm_dbg, false),
