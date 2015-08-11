@@ -148,3 +148,10 @@ config IWLWIFI_PLATFORM_DATA
 	  for power function handlings (GPIO toggling)
 
 	  If unsure, select N.
+
+config IWLMVM_WAKELOCK
+	def_bool y
+	depends on WAKELOCK || HAS_WAKELOCK
+	---help---
+	This option allows to prevent the CPU from suspending while
+	it is needed.
