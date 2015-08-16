@@ -71,11 +71,13 @@
  *	virtual interface
  * @IWL_MVM_VENDOR_CMD_GET_LOW_LATENCY: query low-latency mode
  * @IWL_MVM_VENDOR_CMD_TCM_EVENT: TCM event
+ * @IWL_MVM_VENDOR_CMD_RXFILTER: Set/clear rx filter.
  */
 enum iwl_mvm_vendor_cmd {
 	IWL_MVM_VENDOR_CMD_SET_LOW_LATENCY,
 	IWL_MVM_VENDOR_CMD_GET_LOW_LATENCY,
 	IWL_MVM_VENDOR_CMD_TCM_EVENT,
+	IWL_MVM_VENDOR_CMD_RXFILTER = 23,
 };
 
 /**
@@ -95,6 +97,33 @@ enum iwl_mvm_vendor_load {
 };
 
 /**
+ * enum iwl_mvm_vendor_rxfilter_flags - the type of request rxfilter
+ *
+ * @IWL_MVM_VENDOR_RXFILTER_UNICAST: control unicast Rx filter
+ * @IWL_MVM_VENDOR_RXFILTER_BCAST: control broadcast Rx filter
+ * @IWL_MVM_VENDOR_RXFILTER_MCAST4: control IPv4 multicast Rx filter
+ * @IWL_MVM_VENDOR_RXFILTER_MCAST6: control IPv4 multicast Rx filter
+ *
+ */
+enum iwl_mvm_vendor_rxfilter_flags {
+	IWL_MVM_VENDOR_RXFILTER_UNICAST = BIT(0),
+	IWL_MVM_VENDOR_RXFILTER_BCAST = BIT(1),
+	IWL_MVM_VENDOR_RXFILTER_MCAST4 = BIT(2),
+	IWL_MVM_VENDOR_RXFILTER_MCAST6 = BIT(3),
+};
+
+/**
+ * enum iwl_mvm_vendor_rxfilter_op - the operation associated with a filter
+ *
+ * @IWL_MVM_VENDOR_RXFILTER_OP_PASS: pass frames matching the filter
+ * @IWL_MVM_VENDOR_RXFILTER_OP_DROP: drop frames matching the filter
+ */
+enum iwl_mvm_vendor_rxfilter_op {
+	IWL_MVM_VENDOR_RXFILTER_OP_PASS,
+	IWL_MVM_VENDOR_RXFILTER_OP_DROP,
+};
+
+/**
  * enum iwl_mvm_vendor_attr - attributes used in vendor commands
  * @__IWL_MVM_VENDOR_ATTR_INVALID: attribute 0 is invalid
  * @IWL_MVM_VENDOR_ATTR_LOW_LATENCY: low-latency flag attribute
@@ -105,6 +134,10 @@ enum iwl_mvm_vendor_load {
  * @IWL_MVM_VENDOR_ATTR_LOAD: global traffic load (u8, see load enum)
  * @NUM_IWL_MVM_VENDOR_ATTR: number of vendor attributes
  * @MAX_IWL_MVM_VENDOR_ATTR: highest vendor attribute number
+ * @IWL_MVM_VENDOR_ATTR_RXFILTER: u32 attribute.
+ *     See iwl_mvm_vendor_rxfilter_flags.
+ * @IWL_MVM_VENDOR_ATTR_RXFILTER_OP: u32 attribute.
+ *     See iwl_mvm_vendor_rxfilter_op.
  */
 enum iwl_mvm_vendor_attr {
 	__IWL_MVM_VENDOR_ATTR_INVALID,
@@ -114,6 +147,8 @@ enum iwl_mvm_vendor_attr {
 	IWL_MVM_VENDOR_ATTR_LL,
 	IWL_MVM_VENDOR_ATTR_VIF_LOAD,
 	IWL_MVM_VENDOR_ATTR_LOAD,
+	IWL_MVM_VENDOR_ATTR_RXFILTER = 39,
+	IWL_MVM_VENDOR_ATTR_RXFILTER_OP = 40,
 
 	NUM_IWL_MVM_VENDOR_ATTR,
 	MAX_IWL_MVM_VENDOR_ATTR = NUM_IWL_MVM_VENDOR_ATTR - 1,

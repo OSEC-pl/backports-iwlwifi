@@ -738,6 +738,7 @@ struct iwl_mvm {
 	/* when doing ifup, should we use last_alpha2 for regdom info */
 	bool use_last_alpha2;
 	char last_alpha2[2];
+	u8 rx_filters;
 };
 
 /* Extract MVM priv from op_mode and _hw */
