@@ -971,6 +971,11 @@ struct iwl_mvm {
 #ifdef CPTCFG_IWLMVM_WAKELOCK
 	struct wake_lock recovery_wake_lock;
 #endif
+
+#ifdef CPTCFG_IWLMVM_VENDOR_CMDS
+	struct iwl_mcast_filter_cmd *mcast_active_filter_cmd;
+	u8 rx_filters;
+#endif
 };
 
 /* Extract MVM priv from op_mode and _hw */
@@ -1712,5 +1717,12 @@ iwl_fw_dbg_trigger_simple_stop(struct iwl_mvm *mvm,
 
 	iwl_mvm_fw_dbg_collect_trig(mvm, trigger, NULL);
 }
+
+#ifdef CPTCFG_IWLMVM_VENDOR_CMDS
+void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm);
+
+void iwl_mvm_active_rx_filters(struct iwl_mvm *mvm);
+
+#endif
 
 #endif /* __IWL_MVM_H__ */
