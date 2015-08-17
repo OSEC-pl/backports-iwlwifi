@@ -575,6 +575,7 @@ struct iwl_mvm {
 	enum iwl_scan_status scan_status;
 	struct iwl_scan_cmd *scan_cmd;
 	struct iwl_mcast_filter_cmd *mcast_filter_cmd;
+	struct iwl_mcast_filter_cmd *mcast_active_filter_cmd;
 
 	/* rx chain antennas set through debugfs for the scan command */
 	u8 scan_rx_ant;
@@ -1200,5 +1201,7 @@ static inline void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm) {}
 
 int iwl_mvm_start_fw_dbg_conf(struct iwl_mvm *mvm, enum iwl_fw_dbg_conf id);
 void iwl_mvm_fw_dbg_collect(struct iwl_mvm *mvm);
+void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm);
+void iwl_mvm_calculate_rx_filters(struct iwl_mvm *mvm);
 
 #endif /* __IWL_MVM_H__ */

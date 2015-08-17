@@ -1395,7 +1395,7 @@ static void iwl_mvm_mc_iface_iterator(void *_data, u8 *mac,
 {
 	struct iwl_mvm_mc_iter_data *data = _data;
 	struct iwl_mvm *mvm = data->mvm;
-	struct iwl_mcast_filter_cmd *cmd = mvm->mcast_filter_cmd;
+	struct iwl_mcast_filter_cmd *cmd = mvm->mcast_active_filter_cmd;
 	int ret, len;
 
 	/* if we don't have free ports, mcast frames will be dropped */
@@ -1415,7 +1415,7 @@ static void iwl_mvm_mc_iface_iterator(void *_data, u8 *mac,
 		IWL_ERR(mvm, "mcast filter cmd error. ret=%d\n", ret);
 }
 
-static void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm)
+void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm)
 {
 	struct iwl_mvm_mc_iter_data iter_data = {
 		.mvm = mvm,
@@ -1429,6 +1429,73 @@ static void iwl_mvm_recalc_multicast(struct iwl_mvm *mvm)
 	ieee80211_iterate_active_interfaces(
 		mvm->hw, IEEE80211_IFACE_ITER_NORMAL,
 		iwl_mvm_mc_iface_iterator, &iter_data);
+}
+
+void iwl_mvm_calculate_rx_filters(struct iwl_mvm *mvm)
+{
+	int i, len, total = 0;
+	struct iwl_mcast_filter_cmd *cmd;
+	static const u8 ipv4mc[] = {0x01, 0x00, 0x5e};
+	static const u8 ipv6mc[] = {0x33, 0x33};
+	static const u8 ipv4_mdns[] = {0x01, 0x00, 0x5e, 0x00, 0x00, 0xfb};
+	static const u8 ipv6_mdns[] = {0x33, 0x33, 0x00, 0x00, 0x00, 0xfb};
+
+	lockdep_assert_held(&mvm->mutex);
+
+	for (i = 0; i < mvm->mcast_filter_cmd->count; i++) {
+		if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST4 &&
+		    memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+			   ipv4mc, sizeof(ipv4mc)) == 0)
+			total++;
+		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv4_mdns, sizeof(ipv4_mdns)))
+			total++;
+		else if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST6 &&
+			 memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv6mc, sizeof(ipv6mc)) == 0)
+			total++;
+		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv6_mdns, sizeof(ipv6_mdns)))
+			total++;
+	}
+
+	/* FW expects full words */
+	len = roundup(sizeof(*cmd) + total * ETH_ALEN, 4);
+	cmd = kzalloc(len, GFP_KERNEL);
+	if (!cmd)
+		return;
+
+	memcpy(cmd, mvm->mcast_filter_cmd, sizeof(*cmd));
+
+	for (i = 0; i < mvm->mcast_filter_cmd->count; i++) {
+		bool copy_filter = false;
+
+		if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST4 &&
+		    memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+			   ipv4mc, sizeof(ipv4mc)) == 0)
+			copy_filter = true;
+		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv4_mdns, sizeof(ipv4_mdns)))
+			copy_filter = true;
+		else if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST6 &&
+			 memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv6mc, sizeof(ipv6mc)) == 0)
+			copy_filter = true;
+		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+				ipv6_mdns, sizeof(ipv6_mdns)))
+			copy_filter = true;
+
+		if (!copy_filter)
+			continue;
+
+		memcpy(&cmd->addr_list[cmd->count * ETH_ALEN],
+		       &mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
+		       ETH_ALEN);
+		cmd->count++;
+	}
+
+	kfree(mvm->mcast_active_filter_cmd);
+	mvm->mcast_active_filter_cmd = cmd;
 }
 
 static u64 iwl_mvm_prepare_multicast(struct ieee80211_hw *hw,
@@ -1498,6 +1565,7 @@ static void iwl_mvm_configure_filter(struct ieee80211_hw *hw,
 	if (!cmd)
 		goto out;
 
+	iwl_mvm_calculate_rx_filters(mvm);
 	iwl_mvm_recalc_multicast(mvm);
 out:
 	mutex_unlock(&mvm->mutex);

@@ -603,7 +603,9 @@ static void iwl_op_mode_mvm_stop(struct iwl_op_mode *op_mode)
 
 	kfree(mvm->scan_cmd);
 	kfree(mvm->mcast_filter_cmd);
+	kfree(mvm->mcast_active_filter_cmd);
 	mvm->mcast_filter_cmd = NULL;
+	mvm->mcast_active_filter_cmd = NULL;
 
 #if defined(CONFIG_PM_SLEEP) && defined(CPTCFG_IWLWIFI_DEBUGFS)
 	kfree(mvm->d3_resume_sram);

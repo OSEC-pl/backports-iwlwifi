@@ -174,8 +174,15 @@ static int iwl_mvm_vendor_rxfilter(struct wiphy *wiphy,
 		return -EINVAL;
 	}
 
+	if (rx_filters == mvm->rx_filters)
+		return 0;
+
 	mutex_lock(&mvm->mutex);
+
 	mvm->rx_filters = rx_filters;
+	iwl_mvm_calculate_rx_filters(mvm);
+	iwl_mvm_recalc_multicast(mvm);
+
 	mutex_unlock(&mvm->mutex);
 
 	return 0;
