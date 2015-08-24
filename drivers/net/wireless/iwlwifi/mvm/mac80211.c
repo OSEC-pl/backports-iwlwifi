@@ -1448,14 +1448,14 @@ void iwl_mvm_calculate_rx_filters(struct iwl_mvm *mvm)
 			   ipv4mc, sizeof(ipv4mc)) == 0)
 			total++;
 		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
-				ipv4_mdns, sizeof(ipv4_mdns)))
+				ipv4_mdns, sizeof(ipv4_mdns)) == 0)
 			total++;
 		else if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST6 &&
 			 memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
 				ipv6mc, sizeof(ipv6mc)) == 0)
 			total++;
 		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
-				ipv6_mdns, sizeof(ipv6_mdns)))
+				ipv6_mdns, sizeof(ipv6_mdns)) == 0)
 			total++;
 	}
 
@@ -1475,14 +1475,14 @@ void iwl_mvm_calculate_rx_filters(struct iwl_mvm *mvm)
 			   ipv4mc, sizeof(ipv4mc)) == 0)
 			copy_filter = true;
 		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
-				ipv4_mdns, sizeof(ipv4_mdns)))
+				ipv4_mdns, sizeof(ipv4_mdns)) == 0)
 			copy_filter = true;
 		else if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_MCAST6 &&
 			 memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
 				ipv6mc, sizeof(ipv6mc)) == 0)
 			copy_filter = true;
 		else if (memcmp(&mvm->mcast_filter_cmd->addr_list[i * ETH_ALEN],
-				ipv6_mdns, sizeof(ipv6_mdns)))
+				ipv6_mdns, sizeof(ipv6_mdns)) == 0)
 			copy_filter = true;
 
 		if (!copy_filter)
