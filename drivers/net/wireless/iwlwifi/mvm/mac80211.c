@@ -1466,6 +1466,7 @@ void iwl_mvm_calculate_rx_filters(struct iwl_mvm *mvm)
 		return;
 
 	memcpy(cmd, mvm->mcast_filter_cmd, sizeof(*cmd));
+	cmd->count = 0;
 
 	for (i = 0; i < mvm->mcast_filter_cmd->count; i++) {
 		bool copy_filter = false;
