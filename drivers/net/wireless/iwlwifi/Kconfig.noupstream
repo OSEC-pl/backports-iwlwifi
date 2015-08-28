@@ -190,6 +190,7 @@ config IWLMVM_WAKELOCK
 config IWLWIFI_DISALLOW_OLDER_FW
 	bool "disallow fallback to older firmware images"
 	depends on IWLWIFI
+	default y
 	help
 	  This Kconfig option allows disabling fallback to older firmware images
 	  to ensure tight coupling between driver and firmware releases. When
