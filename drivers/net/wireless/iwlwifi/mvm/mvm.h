@@ -937,10 +937,6 @@ int iwl_mvm_window_status_notif(struct iwl_mvm *mvm,
 
 void iwl_mvm_mac_ctxt_recalc_tsf_id(struct iwl_mvm *mvm,
 				    struct ieee80211_vif *vif);
-int iwl_mvm_mac_ctxt_cmd_ap(struct iwl_mvm *mvm,
-			    struct ieee80211_vif *vif,
-			    u32 action);
-
 /* Bindings */
 int iwl_mvm_binding_add_vif(struct iwl_mvm *mvm, struct ieee80211_vif *vif);
 int iwl_mvm_binding_remove_vif(struct iwl_mvm *mvm, struct ieee80211_vif *vif);

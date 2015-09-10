@@ -335,7 +335,7 @@ int iwl_mvm_add_sta(struct iwl_mvm *mvm,
 
 	if (vif->type == NL80211_IFTYPE_AP) {
 		mvmvif->ap_assoc_sta_count++;
-		iwl_mvm_mac_ctxt_cmd_ap(mvm, vif, FW_CTXT_ACTION_MODIFY);
+		iwl_mvm_mac_ctxt_changed(mvm, vif, NULL);
 	}
 
 	spin_lock_init(&mvm_sta->lock);
