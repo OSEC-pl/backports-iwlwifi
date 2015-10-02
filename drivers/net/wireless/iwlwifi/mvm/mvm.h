@@ -1507,6 +1507,15 @@ void iwl_mvm_enable_txq(struct iwl_mvm *mvm, int queue, u16 ssn,
 			unsigned int wdg_timeout);
 void iwl_mvm_disable_txq(struct iwl_mvm *mvm, int queue, u8 flags);
 
+/* Return a bitmask with all the hw supported queues, except for the
+ * command queue, which can't be flushed.
+ */
+static inline u32 iwl_mvm_flushable_queues(struct iwl_mvm *mvm)
+{
+	return ((BIT(mvm->cfg->base_params->num_of_queues) - 1) &
+		~BIT(IWL_MVM_CMD_QUEUE));
+}
+
 static inline
 void iwl_mvm_enable_ac_txq(struct iwl_mvm *mvm, int queue,
 			   u8 fifo, unsigned int wdg_timeout)
