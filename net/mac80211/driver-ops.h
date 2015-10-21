@@ -1,3 +1,11 @@
+/*
+ * Copyright 2015 Intel Deutschland GmbH
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+
 #ifndef __MAC80211_DRIVER_OPS
 #define __MAC80211_DRIVER_OPS
 
@@ -72,17 +80,28 @@ static inline int drv_start(struct ieee80211_local *local)
 
 	might_sleep();
 
+	if (WARN_ON(local->started))
+		return -EALREADY;
+
 	trace_drv_start(local);
 	local->started = true;
+	/* allow rx frames */
 	smp_mb();
 	ret = local->ops->start(&local->hw);
 	trace_drv_return_int(local, ret);
+
+	if (ret)
+		local->started = false;
+
 	return ret;
 }
 
 static inline void drv_stop(struct ieee80211_local *local)
 {
 	might_sleep();
+
+	if (WARN_ON(!local->started))
+		return;
 
 	trace_drv_stop(local);
 	local->ops->stop(&local->hw);
