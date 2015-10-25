@@ -2610,8 +2610,6 @@ static void print_regdomain_info(const struct ieee80211_regdomain *rd)
 
 static int reg_set_rd_core(const struct ieee80211_regdomain *rd)
 {
-	if (!is_world_regdom(rd->alpha2))
-		return -EINVAL;
 	update_world_regdomain(rd);
 	return 0;
 }
