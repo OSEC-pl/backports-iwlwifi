@@ -280,6 +280,20 @@ static int iwl_sdio_ta_write(struct iwl_trans *trans,
 	return ret;
 }
 
+static int iwl_sdio_ta_write32(struct iwl_trans *trans, u32 target_addr,
+			       u32 data, enum iwl_sdio_ta_ac_flags ac_mode)
+{
+	return iwl_sdio_ta_write(trans, target_addr, sizeof(data),
+				 &data, ac_mode);
+}
+
+static int iwl_sdio_ta_write8(struct iwl_trans *trans, u32 target_addr,
+			      u8 data, enum iwl_sdio_ta_ac_flags ac_mode)
+{
+	return iwl_sdio_ta_write(trans, target_addr, sizeof(data),
+				 &data, ac_mode);
+}
+
 /*
  * Called from the interrupt handler when there is data ready after a
  * target access read command.
@@ -472,8 +486,7 @@ static void iwl_trans_sdio_write8(struct iwl_trans *trans, u32 ofs, u8 val)
 	sdio_claim_host(func);
 
 	/* Use target access through the SDTM for indirect write */
-	ret = iwl_sdio_ta_write(trans, ofs, sizeof(u8), &val,
-				IWL_SDIO_TA_AC_INDIRECT);
+	ret = iwl_sdio_ta_write8(trans, ofs, val, IWL_SDIO_TA_AC_INDIRECT);
 	if (ret) {
 		set_bit(STATUS_TRANS_DEAD, &trans->status);
 
@@ -504,8 +517,7 @@ static void iwl_trans_sdio_write32(struct iwl_trans *trans, u32 ofs, u32 val)
 	sdio_claim_host(func);
 
 	/* Use target access through the SDTM for direct write */
-	ret = iwl_sdio_ta_write(trans, ofs, sizeof(u32), &val,
-				IWL_SDIO_TA_AC_DIRECT);
+	ret = iwl_sdio_ta_write32(trans, ofs, val, IWL_SDIO_TA_AC_DIRECT);
 	if (ret) {
 		set_bit(STATUS_TRANS_DEAD, &trans->status);
 		/* TODO: Call op_mode nic_error if the operation failed
@@ -569,8 +581,7 @@ static void iwl_trans_sdio_write_prph(struct iwl_trans *trans, u32 addr,
 	sdio_claim_host(func);
 
 	/* Use standard target access - The SDTM will perform the prph flow */
-	ret = iwl_sdio_ta_write(trans, addr, sizeof(u32), &val,
-				IWL_SDIO_TA_AC_PRPH);
+	ret = iwl_sdio_ta_write32(trans, addr, val, IWL_SDIO_TA_AC_PRPH);
 	if (ret) {
 		set_bit(STATUS_TRANS_DEAD, &trans->status);
 		/*
@@ -601,8 +612,7 @@ static void iwl_sdio_write_prph_no_claim(struct iwl_trans *trans, u32 addr,
 	}
 
 	/* Use standard target access - The SDTM will perform the prph flow */
-	ret = iwl_sdio_ta_write(trans, addr, sizeof(u32), &val,
-				IWL_SDIO_TA_AC_PRPH);
+	ret = iwl_sdio_ta_write32(trans, addr, val, IWL_SDIO_TA_AC_PRPH);
 	if (ret) {
 		/*
 		 * TODO: Call op_mode nic_error if the operation failed
@@ -1149,20 +1159,19 @@ static int iwl_sdio_wait_h2d_gp_cmd_ack(struct iwl_trans *trans)
  */
 static int iwl_sdio_config_fh(struct iwl_trans *trans)
 {
-	u32 write_data;
 	int ret;
 
 	/* Configure the FH TSSR TX msg properties */
-	write_data = IWL_SDIO_FH_TSSR_TX_CONFIG;
-	ret = iwl_sdio_ta_write(trans, FH_TSSR_TX_MSG_CONFIG_REG, sizeof(u32),
-				&write_data, IWL_SDIO_TA_AC_DIRECT);
+	ret = iwl_sdio_ta_write32(trans, FH_TSSR_TX_MSG_CONFIG_REG,
+				  IWL_SDIO_FH_TSSR_TX_CONFIG,
+				  IWL_SDIO_TA_AC_DIRECT);
 	if (ret)
 		goto exit_error;
 
 	/* Configures the HW for SDIO */
-	write_data = IWL_SDIO_CSR_HW_COFIG;
-	ret = iwl_sdio_ta_write(trans, CSR_HW_IF_CONFIG_REG, sizeof(u32),
-				&write_data, IWL_SDIO_TA_AC_DIRECT);
+	ret = iwl_sdio_ta_write32(trans, CSR_HW_IF_CONFIG_REG,
+				  IWL_SDIO_CSR_HW_CONFIG,
+				  IWL_SDIO_TA_AC_DIRECT);
 	if (ret)
 		goto exit_error;
 
@@ -1352,7 +1361,6 @@ static int iwl_trans_sdio_start_hw(struct iwl_trans *trans, bool low_power)
 {
 	struct iwl_trans_sdio *trans_sdio = IWL_TRANS_GET_SDIO_TRANS(trans);
 	struct sdio_func *func = IWL_TRANS_SDIO_GET_FUNC(trans);
-	u32 val = 0;
 	int ret;
 
 	/*
@@ -1413,8 +1421,8 @@ static int iwl_trans_sdio_start_hw(struct iwl_trans *trans, bool low_power)
 	 * Set SDTM CSR register to disabled read optimization on 8000
 	 * family B/C-step, as the optimization currently causes issues
 	 */
-	ret = iwl_sdio_ta_write(trans, CSR_SDTM_REG, sizeof(u32), &val,
-				IWL_SDIO_TA_AC_DIRECT);
+	ret = iwl_sdio_ta_write32(trans, CSR_SDTM_REG, 0,
+				  IWL_SDIO_TA_AC_DIRECT);
 	if (ret) {
 		IWL_ERR(trans,
 			"Failed to set SDIO to optimized reading\n");
@@ -1663,7 +1671,7 @@ static int iwl_sdio_load_fw_chunk(struct iwl_trans *trans,
 static int iwl_sdio_load_fw_section(struct iwl_trans *trans, u8 section_num,
 				    const struct fw_desc *section)
 {
-	u32 data, offset, copy_size;
+	u32 offset, copy_size;
 	int ret = 0;
 	u32 *temp_fw_buff_t;
 
@@ -1698,10 +1706,9 @@ static int iwl_sdio_load_fw_section(struct iwl_trans *trans, u8 section_num,
 
 	/* W/A for WP B0 */
 	if (section_num == IWL_UCODE_SECTION_INST) {
-		data = CSR_INI_SET_MASK;
-		ret = iwl_sdio_ta_write(trans, CSR_INT_MASK,
-					sizeof(u32), &data,
-					IWL_SDIO_TA_AC_DIRECT);
+		ret = iwl_sdio_ta_write32(trans, CSR_INT_MASK,
+					  CSR_INI_SET_MASK,
+					  IWL_SDIO_TA_AC_DIRECT);
 		if (ret)
 			IWL_ERR(trans, "Failed to set interrupt mask.\n");
 	}
@@ -1861,9 +1868,8 @@ static int iwl_sdio_load_cpu_sections(struct iwl_trans *trans,
 			return ret;
 		/* send to ucode the section number and the status */
 		load_status |= (sec_num << shift_param);
-		ret = iwl_sdio_ta_write(trans, FH_UCODE_LOAD_STATUS,
-					sizeof(u32), &load_status,
-					IWL_SDIO_TA_AC_DIRECT);
+		ret = iwl_sdio_ta_write32(trans, FH_UCODE_LOAD_STATUS,
+					  load_status, IWL_SDIO_TA_AC_DIRECT);
 		if (ret)
 			return ret;
 
@@ -1878,9 +1884,8 @@ static int iwl_sdio_load_cpu_sections(struct iwl_trans *trans,
 	else
 		load_status = 0xFFFFFFFF;
 
-	ret = iwl_sdio_ta_write(trans, FH_UCODE_LOAD_STATUS,
-				sizeof(u32), &load_status,
-				IWL_SDIO_TA_AC_DIRECT);
+	ret = iwl_sdio_ta_write32(trans, FH_UCODE_LOAD_STATUS,
+				  load_status, IWL_SDIO_TA_AC_DIRECT);
 	if (ret)
 		return ret;
 
@@ -1891,7 +1896,6 @@ static void iwl_sdio_apply_destination(struct iwl_trans *trans)
 {
 	const struct iwl_fw_dbg_dest_tlv *dest = trans->dbg_dest_tlv;
 	int i, ret;
-	u32 val2;
 
 	if (dest->version)
 		IWL_ERR(trans,
@@ -1907,20 +1911,19 @@ static void iwl_sdio_apply_destination(struct iwl_trans *trans)
 	for (i = 0; i < trans->dbg_dest_reg_num; i++) {
 		u32 addr = le32_to_cpu(dest->reg_ops[i].addr);
 		u32 val = le32_to_cpu(dest->reg_ops[i].val);
+		u32 val2;
 
 		switch (dest->reg_ops[i].op) {
 		case CSR_ASSIGN:
-			ret = iwl_sdio_ta_write(trans, addr, sizeof(u32),
-						&val,
-						IWL_SDIO_TA_AC_DIRECT);
+			ret = iwl_sdio_ta_write32(trans, addr,
+						  val, IWL_SDIO_TA_AC_DIRECT);
 			if (ret)
 				IWL_ERR(trans,
 					"apply destination: failed to write to CSR %d\n",
 					ret);
 			break;
 		case CSR_SETBIT:
-			ret = iwl_sdio_ta_read(trans, addr, sizeof(u32),
-					       &val2,
+			ret = iwl_sdio_ta_read(trans, addr, sizeof(u32), &val2,
 					       IWL_SDIO_TA_AC_DIRECT);
 			if (ret) {
 				IWL_ERR(trans,
@@ -1929,10 +1932,8 @@ static void iwl_sdio_apply_destination(struct iwl_trans *trans)
 				break;
 			}
 
-			val2 |= BIT(val);
-			ret = iwl_sdio_ta_write(trans, addr, sizeof(u32),
-						&val2,
-						IWL_SDIO_TA_AC_DIRECT);
+			ret = iwl_sdio_ta_write32(trans, addr, val2 | BIT(val),
+						  IWL_SDIO_TA_AC_DIRECT);
 			if (ret)
 				IWL_ERR(trans,
 					"apply destination: failed to write to CSR %d\n",
@@ -1949,10 +1950,8 @@ static void iwl_sdio_apply_destination(struct iwl_trans *trans)
 				break;
 			}
 
-			val2 &= ~BIT(val);
-			ret = iwl_sdio_ta_write(trans, addr, sizeof(u32),
-						&val2,
-						IWL_SDIO_TA_AC_DIRECT);
+			ret = iwl_sdio_ta_write32(trans, addr, val2 & ~BIT(val),
+						  IWL_SDIO_TA_AC_DIRECT);
 			if (ret)
 				IWL_ERR(trans,
 					"apply destination: failed to write to CSR %d\n",

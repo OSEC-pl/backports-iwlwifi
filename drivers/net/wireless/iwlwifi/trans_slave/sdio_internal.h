@@ -100,8 +100,7 @@
  * SDIO configuration
  */
 #define IWL_SDIO_CSR_HW_CONFIG_IF_BIT		0x10
-#define IWL_SDIO_CSR_HW_COFIG \
-				(0x8400 | IWL_SDIO_CSR_HW_CONFIG_IF_BIT);
+#define IWL_SDIO_CSR_HW_CONFIG (0x8400 | IWL_SDIO_CSR_HW_CONFIG_IF_BIT)
 
 /* SDIO RBD size*/
 enum iwl_sdio_rb_size {
