@@ -570,6 +570,7 @@ iwl_parse_nvm_data(struct device *dev, const struct iwl_cfg *cfg,
 				sku & NVM_SKU_CAP_11AC_ENABLE, tx_chains,
 				rx_chains, lar_supported);
 	}
+	IWL_INFO_DEV(dev, "MAC address: %pM\n", data->hw_addr);
 
 	data->calib_version = 255;
 

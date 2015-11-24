@@ -52,6 +52,7 @@ void __iwl_crit(struct device *dev, const char *fmt, ...) __printf(2, 3);
 #define IWL_ERR_DEV(d, f, a...) __iwl_err((d), false, false, f, ## a)
 #define IWL_WARN(m, f, a...) __iwl_warn((m)->dev, f, ## a)
 #define IWL_INFO(m, f, a...) __iwl_info((m)->dev, f, ## a)
+#define IWL_INFO_DEV(d, f, a...) __iwl_info((d), f, ## a)
 #define IWL_CRIT(m, f, a...) __iwl_crit((m)->dev, f, ## a)
 
 #if defined(CPTCFG_IWLWIFI_DEBUG) || defined(CPTCFG_IWLWIFI_DEVICE_TRACING)
