@@ -1444,6 +1444,17 @@ static void iwl_mvm_restart_cleanup(struct iwl_mvm *mvm)
 
 	/* keep statistics ticking */
 	iwl_mvm_accu_radio_stats(mvm);
+
+#ifdef CPTCFG_IWLMVM_WAKELOCK
+	/* We can release the wake lock here already, without waiting
+	 * for the iwl_mvm_restart_complete() to be called.  This all
+	 * runs in the same work, so the device won't try to sleep
+	 * before this work is complete anyway.  Releasing the lock
+	 * already here simplifies error cases handling (i.e. we don't
+	 * risk leaving the wake_lock grabbed).
+	*/
+	wake_unlock(&mvm->recovery_wake_lock);
+#endif /* CPTCFG_IWLMVM_WAKELOCK */
 }
 
 int __iwl_mvm_mac_start(struct iwl_mvm *mvm)
@@ -1524,9 +1535,6 @@ static void iwl_mvm_restart_complete(struct iwl_mvm *mvm)
 	 * of packets the FW sent out, so we must reconnect.
 	 */
 	iwl_mvm_teardown_tdls_peers(mvm);
-#ifdef CPTCFG_IWLMVM_WAKELOCK
-	wake_unlock(&mvm->recovery_wake_lock);
-#endif
 
 	mutex_unlock(&mvm->mutex);
 
