@@ -3102,7 +3102,7 @@ void ieee80211_mark_rx_ba_filtered_frames(struct ieee80211_sta *pubsta, u8 tid,
 	};
 	int i, diff;
 
-	if (WARN_ON(!pubsta || tid >= IEEE80211_NUM_TIDS))
+	if (WARN_ON_ONCE(!pubsta || tid >= IEEE80211_NUM_TIDS))
 		return;
 
 	__skb_queue_head_init(&frames);
@@ -3138,7 +3138,7 @@ void ieee80211_mark_rx_ba_filtered_frames(struct ieee80211_sta *pubsta, u8 tid,
 	/* handle the case that received ssn is behind the mac ssn.
 	 * it can be tid_agg_rx->buf_size behind and still be valid */
 	diff = (tid_agg_rx->head_seq_num - ssn) & IEEE80211_SN_MASK;
-	if (WARN_ON(diff >= tid_agg_rx->buf_size)) {
+	if (diff >= tid_agg_rx->buf_size) {
 		tid_agg_rx->reorder_buf_filtered = 0;
 		goto release;
 	}
