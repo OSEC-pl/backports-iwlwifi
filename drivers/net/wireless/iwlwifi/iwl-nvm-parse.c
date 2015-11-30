@@ -483,11 +483,15 @@ static void iwl_set_radio_cfg(const struct iwl_cfg *cfg,
 	data->radio_cfg_pnum = NVM_RF_CFG_FLAVOR_MSK_FAMILY_8000(radio_cfg);
 }
 
-static void iwl_set_hw_address(const struct iwl_cfg *cfg,
+static void iwl_set_hw_address(struct device *dev,
+			       const struct iwl_cfg *cfg,
 			       struct iwl_nvm_data *data,
 			       const __le16 *nvm_sec)
 {
 	u8 hw_addr[ETH_ALEN];
+	static const u8 reserved_mac[] = {
+		0x0a, 0x0b, 0xad, 0x0d, 0x00, 0xd8
+	};
 
 	if (cfg->device_family != IWL_DEVICE_FAMILY_8000)
 		memcpy(hw_addr, nvm_sec + HW_ADDR, ETH_ALEN);
@@ -502,6 +506,11 @@ static void iwl_set_hw_address(const struct iwl_cfg *cfg,
 	data->hw_addr[3] = hw_addr[2];
 	data->hw_addr[4] = hw_addr[5];
 	data->hw_addr[5] = hw_addr[4];
+
+	if (!memcmp(reserved_mac, data->hw_addr, ETH_ALEN)) {
+		IWL_ERR_DEV(dev, "ERROR: using reserved MAC address\n");
+		memset(data->hw_addr, 0, ETH_ALEN);
+	}
 }
 
 struct iwl_nvm_data *
@@ -557,14 +566,14 @@ iwl_parse_nvm_data(struct device *dev, const struct iwl_cfg *cfg,
 	}
 
 	if (cfg->device_family != IWL_DEVICE_FAMILY_8000) {
-		iwl_set_hw_address(cfg, data, nvm_hw);
+		iwl_set_hw_address(dev, cfg, data, nvm_hw);
 
 		iwl_init_sbands(dev, cfg, data, nvm_sw,
 				sku & NVM_SKU_CAP_11AC_ENABLE, tx_chains,
 				rx_chains, lar_supported);
 	} else {
 		/* MAC address in family 8000 */
-		iwl_set_hw_address(cfg, data, mac_override);
+		iwl_set_hw_address(dev, cfg, data, mac_override);
 
 		iwl_init_sbands(dev, cfg, data, regulatory,
 				sku & NVM_SKU_CAP_11AC_ENABLE, tx_chains,
