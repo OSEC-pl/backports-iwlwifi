@@ -2271,6 +2271,12 @@ bool iwl_mvm_bcast_filter_build_cmd(struct iwl_mvm *mvm,
 	if (!mvm->bcast_filters)
 		return false;
 
+#ifdef CPTCFG_IWLMVM_VENDOR_CMDS
+	if (mvm->rx_filters & IWL_MVM_VENDOR_RXFILTER_BCAST) {
+		cmd->disable = 1;
+		return true;
+	}
+#endif
 	/* configure and attach these filters for each associated sta vif */
 	ieee80211_iterate_active_interfaces(
 		mvm->hw, IEEE80211_IFACE_ITER_NORMAL,
@@ -2278,8 +2284,8 @@ bool iwl_mvm_bcast_filter_build_cmd(struct iwl_mvm *mvm,
 
 	return true;
 }
-static int iwl_mvm_configure_bcast_filter(struct iwl_mvm *mvm,
-					  struct ieee80211_vif *vif)
+
+int iwl_mvm_configure_bcast_filter(struct iwl_mvm *mvm)
 {
 	struct iwl_bcast_filter_cmd cmd;
 
@@ -2293,8 +2299,7 @@ static int iwl_mvm_configure_bcast_filter(struct iwl_mvm *mvm,
 				    sizeof(cmd), &cmd);
 }
 #else
-static inline int iwl_mvm_configure_bcast_filter(struct iwl_mvm *mvm,
-						 struct ieee80211_vif *vif)
+inline int iwl_mvm_configure_bcast_filter(struct iwl_mvm *mvm)
 {
 	return 0;
 }
@@ -2409,7 +2414,7 @@ static void iwl_mvm_bss_info_changed_station(struct iwl_mvm *mvm,
 		}
 
 		iwl_mvm_recalc_multicast(mvm);
-		iwl_mvm_configure_bcast_filter(mvm, vif);
+		iwl_mvm_configure_bcast_filter(mvm);
 
 		/* reset rssi values */
 		mvmvif->bf_data.ave_beacon_signal = 0;
@@ -2460,7 +2465,7 @@ static void iwl_mvm_bss_info_changed_station(struct iwl_mvm *mvm,
 
 	if (changes & BSS_CHANGED_ARP_FILTER) {
 		IWL_DEBUG_MAC80211(mvm, "arp filter changed\n");
-		iwl_mvm_configure_bcast_filter(mvm, vif);
+		iwl_mvm_configure_bcast_filter(mvm);
 	}
 }
 
