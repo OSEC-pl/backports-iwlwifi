@@ -1727,10 +1727,11 @@ static int iwl_sdio_load_fw_section(struct iwl_trans *trans, u8 section_num,
 		if (ret) {
 			IWL_ERR(trans, "Failed to download fw section %d\n",
 				section_num);
-			break;
+			goto exit_err;
 		}
 	}
 
+exit_err:
 	kfree(temp_fw_buff_t);
 
 	return ret;
