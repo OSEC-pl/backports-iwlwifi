@@ -32,4 +32,8 @@ static inline __s32 sign_extend32(__u32 value, int index)
 }
 #endif /* < 2.6.38 */
 
+#ifndef BIT_ULL
+#define BIT_ULL(nr)	(1ULL << (nr))
+#endif
+
 #endif /* __BACKPORT_BITOPS_H */
