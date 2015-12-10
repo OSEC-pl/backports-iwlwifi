@@ -396,8 +396,10 @@ int iwl_slv_tx_get_cmd_entry(struct iwl_trans *trans, struct iwl_rx_packet *pkt,
 			     struct iwl_slv_tx_cmd_entry **cmd_entry);
 
 void iwl_slv_tx_stop(struct iwl_trans *trans);
-void iwl_slv_free(struct iwl_trans *trans);
+void iwl_slv_stop(struct iwl_trans *trans);
+int iwl_slv_start(struct iwl_trans *trans);
 int iwl_slv_init(struct iwl_trans *trans);
+void iwl_slv_destroy(struct iwl_trans *trans);
 void iwl_slv_free_data_queue(struct iwl_trans *trans, int txq_id);
 void iwl_trans_slv_ref(struct iwl_trans *trans);
 void iwl_trans_slv_unref(struct iwl_trans *trans);
