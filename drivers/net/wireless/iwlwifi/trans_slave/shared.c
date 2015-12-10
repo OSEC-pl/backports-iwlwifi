@@ -918,9 +918,11 @@ static void iwl_slv_free_queues(struct iwl_trans *trans)
 }
 
 /**
-* iwl_slv_free - free all the resources, assumes tx is stopped.
-*/
-void iwl_slv_free(struct iwl_trans *trans)
+ * iwl_slv_stop - stop slv
+ *
+ * (free resources allocated during slv start), assumes tx is stopped.
+ */
+void iwl_slv_stop(struct iwl_trans *trans)
 {
 	struct iwl_trans_slv *trans_slv = IWL_TRANS_GET_SLV_TRANS(trans);
 	if (WARN_ON_ONCE(!trans_slv))
@@ -937,11 +939,8 @@ void iwl_slv_free(struct iwl_trans *trans)
 		destroy_workqueue(trans_slv->policy_wq);
 		trans_slv->policy_wq = NULL;
 	}
-
 #ifdef CPTCFG_IWLWIFI_MINI_PM_RUNTIME
 	mini_rpm_destroy(trans_slv);
-#else
-	iwl_slv_rpm_del_device(trans_slv->d0i3_dev);
 #endif
 }
 
@@ -960,6 +959,30 @@ static int iwl_slv_mini_rpm_init(struct iwl_trans *trans)
 #endif
 
 int iwl_slv_init(struct iwl_trans *trans)
+{
+	struct iwl_trans_slv *trans_slv = IWL_TRANS_GET_SLV_TRANS(trans);
+	int ret;
+
+	trans_slv->d0i3_dev = iwl_slv_rpm_add_device(trans);
+	if (IS_ERR(trans_slv->d0i3_dev)) {
+		ret = PTR_ERR(trans_slv->d0i3_dev);
+		trans_slv->d0i3_dev = NULL;
+		return ret;
+	}
+	return 0;
+}
+
+void iwl_slv_destroy(struct iwl_trans *trans)
+{
+	struct iwl_trans_slv *trans_slv = IWL_TRANS_GET_SLV_TRANS(trans);
+
+	if (trans_slv->d0i3_dev) {
+		iwl_slv_rpm_del_device(trans_slv->d0i3_dev);
+		trans_slv->d0i3_dev = NULL;
+	}
+}
+
+int iwl_slv_start(struct iwl_trans *trans)
 {
 	struct iwl_trans_slv *trans_slv;
 	int ret;
@@ -994,13 +1017,6 @@ int iwl_slv_init(struct iwl_trans *trans)
 	ret = iwl_slv_mini_rpm_init(trans);
 	if (ret)
 		goto error;
-#else
-	trans_slv->d0i3_dev = iwl_slv_rpm_add_device(trans);
-	if (IS_ERR(trans_slv->d0i3_dev)) {
-		ret = PTR_ERR(trans_slv->d0i3_dev);
-		trans_slv->d0i3_dev = NULL;
-		goto error;
-	}
 #endif
 
 #ifdef CPTCFG_IWLMVM_WAKELOCK
@@ -1059,11 +1075,11 @@ unregister_class:
 
 void iwl_slv_unregister_drivers(void)
 {
+	iwl_sdio_unregister_driver();
+	iwl_idi_unregister_driver();
 #ifndef CPTCFG_IWLWIFI_MINI_PM_RUNTIME
 	class_unregister(&iwl_slv_rpm_class);
 #endif
-	iwl_sdio_unregister_driver();
-	iwl_idi_unregister_driver();
 }
 
 /* iwl_slv_tx_get_cmd_entry - get requested cmd entry */
