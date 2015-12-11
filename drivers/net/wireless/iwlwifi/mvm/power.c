@@ -860,6 +860,7 @@ int iwl_mvm_update_d0i3_power_mode(struct iwl_mvm *mvm,
 	int ret;
 	struct iwl_mvm_vif *mvmvif = iwl_mvm_vif_from_mac80211(vif);
 	struct iwl_mac_power_cmd cmd = {};
+	bool configure_skip = enable;
 
 	if (vif->type != NL80211_IFTYPE_STATION || vif->p2p)
 		return 0;
@@ -868,7 +869,15 @@ int iwl_mvm_update_d0i3_power_mode(struct iwl_mvm *mvm,
 		return 0;
 
 	iwl_mvm_power_build_cmd(mvm, vif, &cmd);
-	if (enable) {
+
+#ifdef CPTCFG_IWLWIFI_DEBUGFS
+	if (mvmvif->dbgfs_pm.mask & MVM_DEBUGFS_PM_SKIP_OVER_DTIM) {
+		if (configure_skip && !mvmvif->dbgfs_pm.skip_over_dtim)
+			configure_skip = false;
+	}
+#endif /* CPTCFG_IWLWIFI_DEBUGFS */
+
+	if (configure_skip) {
 		/* configure skip over dtim up to 306TU - 314 msec */
 		int dtimper = vif->bss_conf.dtim_period ?: 1;
 		int dtimper_tu = dtimper * vif->bss_conf.beacon_int;
