@@ -2451,6 +2451,7 @@ static const struct {
 	{ .start = 0x00a04560, .end = 0x00a0457c },
 	{ .start = 0x00a04590, .end = 0x00a04598 },
 	{ .start = 0x00a045c0, .end = 0x00a045f4 },
+	{ .start = 0x00a44000, .end = 0x00a7bf80 },
 };
 
 static u32 iwl_trans_pcie_dump_prph(struct iwl_trans *trans,
@@ -2459,6 +2460,9 @@ static u32 iwl_trans_pcie_dump_prph(struct iwl_trans *trans,
 	struct iwl_fw_error_dump_prph *prph;
 	unsigned long flags;
 	u32 prph_len = 0, i;
+
+	if (!test_bit(STATUS_FW_ERROR, &trans->status))
+		return 0;
 
 	if (!iwl_trans_grab_nic_access(trans, false, &flags))
 		return 0;
@@ -2743,14 +2747,17 @@ static struct iwl_trans_dump_data
 	/* CSR registers */
 	len += sizeof(*data) + IWL_CSR_TO_DUMP;
 
-	/* PRPH registers */
-	for (i = 0; i < ARRAY_SIZE(iwl_prph_dump_addr); i++) {
-		/* The range includes both boundaries */
-		int num_bytes_in_chunk = iwl_prph_dump_addr[i].end -
-			iwl_prph_dump_addr[i].start + 4;
+	if (test_bit(STATUS_FW_ERROR, &trans->status)) {
+		/* PRPH registers */
+		for (i = 0; i < ARRAY_SIZE(iwl_prph_dump_addr); i++) {
+			/* The range includes both boundaries */
+			int num_bytes_in_chunk = iwl_prph_dump_addr[i].end -
+				iwl_prph_dump_addr[i].start + 4;
 
-		len += sizeof(*data) + sizeof(struct iwl_fw_error_dump_prph) +
-		       num_bytes_in_chunk;
+			len += sizeof(*data) +
+			       sizeof(struct iwl_fw_error_dump_prph) +
+			       num_bytes_in_chunk;
+		}
 	}
 
 	/* FH registers */
