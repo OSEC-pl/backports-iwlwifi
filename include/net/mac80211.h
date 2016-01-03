@@ -5336,6 +5336,24 @@ void ieee80211_stop_rx_ba_session(struct ieee80211_vif *vif, u16 ba_rx_bitmap,
 				  const u8 *addr);
 
 /**
+ * ieee80211_mark_rx_ba_filtered_frames - move RX BA window and mark filtered
+ * @pubsta: station struct
+ * @tid: the session's TID
+ * @ssn: starting sequence number of the bitmap, all frames before this are
+ *	assumed to be out of the window after the call
+ * @filtered: bitmap of filtered frames, BIT(0) is the @ssn entry etc.
+ * @received_mpdus: number of received mpdus in firmware
+ *
+ * This function moves the BA window and releases all frames before @ssn, and
+ * marks frames marked in the bitmap as having been filtered. Afterwards, it
+ * checks if any frames in the window starting from @ssn can now be released
+ * (in case they were only waiting for frames that were filtered.)
+ */
+void ieee80211_mark_rx_ba_filtered_frames(struct ieee80211_sta *pubsta, u8 tid,
+					  u16 ssn, u64 filtered,
+					  u16 received_mpdus);
+
+/**
  * ieee80211_send_bar - send a BlockAckReq frame
  *
  * can be used to flush pending frames from the peer's aggregation reorder
