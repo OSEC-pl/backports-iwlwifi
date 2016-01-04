@@ -7,6 +7,7 @@
  *
  * Copyright(c) 2014 Intel Corporation. All rights reserved.
  * Copyright(c) 2014 - 2015 Intel Mobile Communications GmbH
+ * Copyright(c) 2016 Intel Deutschland GmbH
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -33,6 +34,7 @@
  *
  * Copyright(c) 2014 Intel Corporation. All rights reserved.
  * Copyright(c) 2014 - 2015 Intel Mobile Communications GmbH
+ * Copyright(c) 2016 Intel Deutschland GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -293,6 +295,10 @@ iwl_fw_error_next_data(struct iwl_fw_error_dump_data *data)
  * @FW_DBG_TX_LATENCY: trigger log collection when the tx latency goes above a
  *	threshold.
  * @FW_DBG_TDLS: trigger log collection upon TDLS related events.
+ * @FW_DBG_TRIGGER_TX_STATUS: trigger log collection upon tx status when
+ *  the firmware sends a tx reply.
+ * @FW_DBG_TRIGGER_USER_EXTENDED: trigger log collection upon user space
+ *  request.
  */
 enum iwl_fw_dbg_trigger {
 	FW_DBG_TRIGGER_INVALID = 0,
@@ -309,6 +315,8 @@ enum iwl_fw_dbg_trigger {
 	FW_DBG_TRIGGER_BA,
 	FW_DBG_TRIGGER_TX_LATENCY,
 	FW_DBG_TRIGGER_TDLS,
+	FW_DBG_TRIGGER_TX_STATUS,
+	FW_DBG_TRIGGER_USER_EXTENDED,
 
 	/* must be last */
 	FW_DBG_TRIGGER_MAX,
