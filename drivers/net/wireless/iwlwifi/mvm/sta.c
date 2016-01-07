@@ -1464,6 +1464,23 @@ int iwl_mvm_remove_sta_key(struct iwl_mvm *mvm,
 		return 0;
 	}
 
+	/*
+	 * It is possible that the 'sta' parameter is NULL,
+	 * for example when a GTK is removed - the sta_id will then
+	 * be the AP ID, and no station was passed by mac80211.
+	 */
+	if (!sta) {
+		sta = rcu_dereference_protected(mvm->fw_id_to_mac_id[sta_id],
+						lockdep_is_held(&mvm->mutex));
+		if (!sta) {
+			IWL_ERR(mvm, "Invalid station id\n");
+			return -EINVAL;
+		}
+	}
+
+	if (WARN_ON_ONCE(iwl_mvm_sta_from_mac80211(sta)->vif != vif))
+		return -EINVAL;
+
 	ret = __iwl_mvm_remove_sta_key(mvm, sta_id, keyconf,
 			iwl_mvm_sta_from_mac80211(sta)->mac_id_n_color, mcast);
 	if (ret)
