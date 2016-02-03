@@ -109,6 +109,7 @@ static const char *const iwl_xvt_cmd_strings[REPLY_MAX + 1] = {
 	CMD(REPLY_RX_PHY_CMD),
 	CMD(REPLY_RX_MPDU_CMD),
 	CMD(REPLY_RX_DSP_EXT_INFO),
+	CMD(FW_PAGING_BLOCK_CMD),
 };
 #undef CMD
 
