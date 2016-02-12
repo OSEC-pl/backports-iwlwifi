@@ -645,7 +645,6 @@ static int iwl_pci_runtime_resume(struct device *device)
 	return 0;
 }
 
-#ifdef CPTCFG_IWLMVM_WAKELOCK
 static int iwl_pci_system_prepare(struct device *device)
 {
 	struct pci_dev *pdev = to_pci_dev(device);
@@ -658,6 +657,13 @@ static int iwl_pci_system_prepare(struct device *device)
 	 * prevent the wakelock from being taken.
 	 */
 	trans->suspending = true;
+
+	/* Wake the device up from runtime suspend before going to
+	 * platform suspend.  This is needed because we don't know
+	 * whether wowlan any is set and, if it's not, mac80211 will
+	 * disconnect (in which case, we can't be in D0i3).
+	 */
+	pm_runtime_resume(device);
 
 	return 0;
 }
@@ -677,7 +683,6 @@ static void iwl_pci_system_complete(struct device *device)
 	 */
 	trans->suspending = false;
 }
-#endif /* CPTCFG_IWLMVM_WAKELOCK */
 #endif /* CPTCFG_IWLWIFI_PCIE_RTPM */
 
 static const struct dev_pm_ops iwl_dev_pm_ops = {
@@ -687,10 +692,8 @@ static const struct dev_pm_ops iwl_dev_pm_ops = {
 	SET_RUNTIME_PM_OPS(iwl_pci_runtime_suspend,
 			   iwl_pci_runtime_resume,
 			   NULL)
-#ifdef CPTCFG_IWLMVM_WAKELOCK
 	.prepare = iwl_pci_system_prepare,
 	.complete = iwl_pci_system_complete,
-#endif /* CPTCFG_IWLMVM_WAKELOCK */
 #endif /* CPTCFG_IWLWIFI_PCIE_RTPM */
 };
 
