@@ -301,6 +301,7 @@ static void iwl_xvt_nic_error(struct iwl_op_mode *op_mode)
 			IWL_WARN(xvt,
 				 "Error %d sending NIC error notification\n",
 				 err);
+		kfree(p_table);
 	}
 
 	if (p_table_umac) {
@@ -312,6 +313,7 @@ static void iwl_xvt_nic_error(struct iwl_op_mode *op_mode)
 			IWL_WARN(xvt,
 				 "Error %d sending NIC umac error notification\n",
 				 err);
+		kfree(p_table_umac);
 	}
 
 }
