@@ -7,6 +7,7 @@
  *
  * Copyright(c) 2007 - 2014 Intel Corporation. All rights reserved.
  * Copyright(c) 2013 - 2015 Intel Mobile Communications GmbH
+ * Copyright(c) 2016 Intel Deutschland GmbH
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of version 2 of the GNU General Public License as
@@ -33,6 +34,7 @@
  *
  * Copyright(c) 2005 - 2014 Intel Corporation. All rights reserved.
  * Copyright(c) 2013 - 2015 Intel Mobile Communications GmbH
+ * Copyright(c) 2016 Intel Deutschland GmbH
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -2439,28 +2441,37 @@ static void iwl_trans_sdio_stop_device(struct iwl_trans *trans, bool low_power)
 	pm_runtime_put(trans->dev);
 }
 
-#ifdef CONFIG_PM_SLEEP
-void _iwl_sdio_suspend(struct iwl_trans *trans)
+static int iwl_trans_sdio_suspend(struct iwl_trans *trans)
 {
 	struct iwl_trans_sdio *trans_sdio = IWL_TRANS_GET_SDIO_TRANS(trans);
+	int ret;
+
+	ret = iwl_trans_slv_suspend(trans);
+	if (ret)
+		return ret;
 
 	IWL_DEBUG_ISR(trans, "setting trans_sdio->suspended = true\n");
 	trans_sdio->suspended = true;
+
+	return 0;
 }
 
-void _iwl_sdio_resume(struct iwl_trans *trans)
+static void iwl_trans_sdio_resume(struct iwl_trans *trans)
 {
 	struct iwl_trans_sdio *trans_sdio = IWL_TRANS_GET_SDIO_TRANS(trans);
 
 	IWL_DEBUG_ISR(trans, "setting trans_sdio->suspended = false\n");
 	trans_sdio->suspended = false;
+
 	if (trans_sdio->pending_irq) {
+		IWL_DEBUG_ISR(trans, "handling pending_irq\n");
 		iwl_sdio_irq_thread(0, trans);
 		enable_irq(trans_sdio->plat_data.irq);
 		trans_sdio->pending_irq = false;
 	}
+
+	iwl_trans_slv_resume(trans);
 }
-#endif /* CONFIG_PM_SLEEP */
 
 #if IS_ENABLED(CPTCFG_IWLXVT)
 static int iwl_trans_sdio_test_mode_cmd(struct iwl_trans *trans, bool enable)
@@ -2782,8 +2793,8 @@ static const struct iwl_trans_ops trans_ops_sdio = {
 
 	.ref = iwl_trans_slv_ref,
 	.unref = iwl_trans_slv_unref,
-	.suspend = iwl_trans_slv_suspend,
-	.resume = iwl_trans_slv_resume,
+	.suspend = iwl_trans_sdio_suspend,
+	.resume = iwl_trans_sdio_resume,
 #if IS_ENABLED(CPTCFG_IWLXVT)
 	.test_mode_cmd = iwl_trans_sdio_test_mode_cmd,
 #endif
