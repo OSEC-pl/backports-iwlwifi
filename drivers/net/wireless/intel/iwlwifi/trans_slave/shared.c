@@ -1910,6 +1910,15 @@ int iwl_slv_rx_handle_dispatch(struct iwl_trans *trans,
 	} else {
 		/* this is probably just for debugging */
 		bool take_ref = pkt->hdr.cmd != DEBUG_LOG_MSG;
+		u32 wide_id = WIDE_ID(pkt->hdr.group_id, pkt->hdr.cmd);
+
+		/*
+		 * we get this notification on d0i3 exit, so avoid
+		 * taking a wakelock (since we exit d0i3 in .prepare(),
+		 * this will abort the suspend)
+		 */
+		if (wide_id == WIDE_ID(PROT_OFFLOAD_GROUP, STORED_BEACON_NTF))
+			take_ref = false;
 
 		/*
 		 * when configuring beacon filtering during d0i3 entrance we
