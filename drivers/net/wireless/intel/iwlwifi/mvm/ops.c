@@ -617,6 +617,7 @@ iwl_op_mode_mvm_start(struct iwl_trans *trans, const struct iwl_cfg *cfg,
 	INIT_WORK(&mvm->d0i3_exit_work, iwl_mvm_d0i3_exit_work);
 	INIT_DELAYED_WORK(&mvm->fw_dump_wk, iwl_mvm_fw_error_dump_wk);
 	INIT_DELAYED_WORK(&mvm->tdls_cs.dwork, iwl_mvm_tdls_ch_switch_work);
+	INIT_DELAYED_WORK(&mvm->scan_timeout_dwork, iwl_mvm_scan_timeout_wk);
 
 	spin_lock_init(&mvm->d0i3_tx_lock);
 	spin_lock_init(&mvm->refs_lock);
@@ -807,9 +808,6 @@ iwl_op_mode_mvm_start(struct iwl_trans *trans, const struct iwl_cfg *cfg,
 	/* init RSS hash key */
 	get_random_bytes(mvm->secret_key, sizeof(mvm->secret_key));
 
-	setup_timer(&mvm->scan_timer, iwl_mvm_scan_timeout,
-		    (unsigned long)mvm);
-
 	return op_mode;
 
  out_unregister:
@@ -899,8 +897,6 @@ static void iwl_op_mode_mvm_stop(struct iwl_op_mode *op_mode)
 #endif /* CPTCFG_IWLMVM_TDLS_PEER_CACHE */
 
 	iwl_mvm_tof_clean(mvm);
-
-	del_timer_sync(&mvm->scan_timer);
 
 	ieee80211_free_hw(mvm->hw);
 }
