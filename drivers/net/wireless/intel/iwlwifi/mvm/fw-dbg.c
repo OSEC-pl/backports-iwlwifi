@@ -438,7 +438,6 @@ static const struct {
 	{ .start = 0x00a04560, .end = 0x00a0457c },
 	{ .start = 0x00a04590, .end = 0x00a04598 },
 	{ .start = 0x00a045c0, .end = 0x00a045f4 },
-	{ .start = 0x00a44000, .end = 0x00a7bf80 },
 };
 
 static u32 iwl_dump_prph(struct iwl_trans *trans,
