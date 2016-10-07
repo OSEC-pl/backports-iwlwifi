@@ -1256,12 +1256,16 @@ static int __iwl_mvm_suspend(struct ieee80211_hw *hw,
 	iwl_trans_d3_suspend(mvm->trans, test, !unified_image);
  out:
 	if (ret < 0) {
-		iwl_mvm_ref(mvm, IWL_MVM_REF_UCODE_DOWN);
-#ifdef CPTCFG_IWLMVM_WAKELOCK
-		wake_lock(&mvm->recovery_wake_lock);
-#endif
-		ieee80211_restart_hw(mvm->hw);
 		iwl_mvm_free_nd(mvm);
+
+		if (!unified_image) {
+			iwl_mvm_ref(mvm, IWL_MVM_REF_UCODE_DOWN);
+#ifdef CPTCFG_IWLMVM_WAKELOCK
+			wake_lock(&mvm->recovery_wake_lock);
+#endif
+			ieee80211_restart_hw(mvm->hw);
+			iwl_mvm_free_nd(mvm);
+		}
 	}
  out_noreset:
 	mutex_unlock(&mvm->mutex);
