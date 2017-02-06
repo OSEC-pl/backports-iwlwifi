@@ -189,6 +189,7 @@ struct tid_ampdu_tx {
  * @auto_seq: used for offloaded BA sessions to automatically pick head_seq_and
  *	and ssn.
  * @removed: this session is removed (but might have been found due to RCU)
+ * @started: this session has started (head ssn or higher was received)
  *
  * This structure's lifetime is managed by RCU, assignments to
  * the array holding it must hold the aggregation mutex.
@@ -215,6 +216,7 @@ struct tid_ampdu_rx {
 	u8 dialog_token;
 	bool auto_seq;
 	bool removed;
+	bool started;
 };
 
 /**
