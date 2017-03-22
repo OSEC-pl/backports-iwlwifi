@@ -887,7 +887,6 @@ struct iwl_mvm {
 	struct iwl_mvm_vif *bf_allowed_vif;
 
 	enum iwl_ucode_type cur_ucode;
-	bool ucode_loaded;
 	bool calibrating;
 	u32 error_event_table;
 	u32 log_event_table;
@@ -1261,6 +1260,7 @@ enum iwl_mvm_status {
 	IWL_MVM_STATUS_ROC_AUX_RUNNING,
 	IWL_MVM_STATUS_D3_RECONFIG,
 	IWL_MVM_STATUS_DUMPING_FW_LOG,
+	IWL_MVM_STATUS_FIRMWARE_RUNNING,
 };
 
 static inline bool iwl_mvm_is_radio_killed(struct iwl_mvm *mvm)
@@ -1276,7 +1276,7 @@ static inline bool iwl_mvm_is_radio_hw_killed(struct iwl_mvm *mvm)
 
 static inline bool iwl_mvm_firmware_running(struct iwl_mvm *mvm)
 {
-	return mvm->ucode_loaded;
+	return test_bit(IWL_MVM_STATUS_FIRMWARE_RUNNING, &mvm->status);
 }
 
 /* Must be called with rcu_read_lock() held and it can only be
@@ -1928,7 +1928,7 @@ void iwl_mvm_enable_ac_txq(struct iwl_mvm *mvm, int queue, int mac80211_queue,
 
 static inline void iwl_mvm_stop_device(struct iwl_mvm *mvm)
 {
-	mvm->ucode_loaded = false;
+	clear_bit(IWL_MVM_STATUS_FIRMWARE_RUNNING, &mvm->status);
 	iwl_trans_stop_device(mvm->trans);
 }
 
