@@ -1412,24 +1412,6 @@ int iwl_mvm_sar_select_profile(struct iwl_mvm *mvm, int prof_a, int prof_b)
 	return iwl_mvm_send_cmd_pdu(mvm, REDUCE_TX_POWER_CMD, 0, len, &cmd);
 }
 
-#else /* CONFIG_ACPI */
-static int iwl_mvm_sar_get_wrds_table(struct iwl_mvm *mvm)
-{
-	return -ENOENT;
-}
-
-static int iwl_mvm_sar_get_ewrd_table(struct iwl_mvm *mvm)
-{
-	return -ENOENT;
-}
-
-static int iwl_mvm_sar_get_wgds_table(struct iwl_mvm *mvm,
-				      struct iwl_mvm_geo_table *geo_table)
-{
-	return -ENOENT;
-}
-#endif /* CONFIG_ACPI */
-
 static int iwl_mvm_sar_geo_init(struct iwl_mvm *mvm)
 {
 	struct iwl_mvm_geo_table geo_table;
@@ -1473,6 +1455,23 @@ static int iwl_mvm_sar_geo_init(struct iwl_mvm *mvm)
 	}
 	return iwl_mvm_send_cmd_pdu(mvm, cmd_wide_id, 0, sizeof(cmd), &cmd);
 }
+
+#else /* CONFIG_ACPI */
+static int iwl_mvm_sar_get_wrds_table(struct iwl_mvm *mvm)
+{
+	return -ENOENT;
+}
+
+static int iwl_mvm_sar_get_ewrd_table(struct iwl_mvm *mvm)
+{
+	return -ENOENT;
+}
+
+static int iwl_mvm_sar_geo_init(struct iwl_mvm *mvm)
+{
+	return 0;
+}
+#endif /* CONFIG_ACPI */
 
 static int iwl_mvm_sar_init(struct iwl_mvm *mvm)
 {
