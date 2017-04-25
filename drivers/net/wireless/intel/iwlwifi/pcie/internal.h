@@ -375,7 +375,7 @@ struct iwl_trans_pcie {
 	dma_addr_t ict_tbl_dma;
 	int ict_index;
 	bool use_ict;
-	bool is_down;
+	bool is_down, opmode_down;
 	struct isr_statistics isr_stats;
 
 	spinlock_t irq_lock;
@@ -731,4 +731,6 @@ int iwl_pci_fw_enter_d0i3(struct iwl_trans *trans);
 
 void iwl_pcie_enable_rx_wake(struct iwl_trans *trans, bool enable);
 
+void iwl_trans_pcie_handle_stop_rfkill(struct iwl_trans *trans,
+				       bool was_in_rfkill);
 #endif /* __iwl_trans_int_pcie_h__ */
