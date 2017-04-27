@@ -2851,8 +2851,8 @@ static int nl80211_set_interface(struct sk_buff *skb, struct genl_info *info)
 			nla_data(info->attrs[NL80211_ATTR_MU_MIMO_GROUP_DATA]);
 
 		/* bits 0 and 63 are reserved and must be zero */
-		if ((mumimo_groups[0] & BIT(7)) ||
-		    (mumimo_groups[VHT_MUMIMO_GROUPS_DATA_LEN - 1] & BIT(0)))
+		if ((mumimo_groups[0] & BIT(0)) ||
+		    (mumimo_groups[VHT_MUMIMO_GROUPS_DATA_LEN - 1] & BIT(7)))
 			return -EINVAL;
 
 		memcpy(params.vht_mumimo_groups, mumimo_groups,
