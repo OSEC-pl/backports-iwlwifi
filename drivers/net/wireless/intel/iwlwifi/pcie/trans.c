@@ -1283,7 +1283,7 @@ static void iwl_pcie_init_msix(struct iwl_trans_pcie *trans_pcie)
 	trans_pcie->hw_mask = trans_pcie->hw_init_mask;
 }
 
-bool iwl_trans_check_hw_rf_kill(struct iwl_trans *trans)
+static bool iwl_trans_check_hw_rf_kill(struct iwl_trans *trans)
 {
 	struct iwl_trans_pcie *trans_pcie =  IWL_TRANS_GET_PCIE_TRANS(trans);
 	bool hw_rfkill = iwl_is_rfkill_set(trans);
