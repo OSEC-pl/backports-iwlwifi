@@ -1,5 +1,5 @@
 /*
- * Copyright(c) 2016 Hauke Mehrtens <hauke-5/S+JYg5SzeELgA04lAiVw@public.gmane.org>
+ * Copyright(c) 2016 Hauke Mehrtens <hauke@hauke-m.de>
  *
  * Backport functionality introduced in Linux 4.7.
  *
@@ -111,7 +111,12 @@ int nla_put_64bit(struct sk_buff *skb, int attrtype, int attrlen,
 }
 EXPORT_SYMBOL_GPL(nla_put_64bit);
 
-#if defined(CPTCFG_BPAUTO_WANT_DEV_COREDUMP) && !defined(CPTCFG_BPAUTO_BUILD_WANT_DEV_COREDUMP)
+/*
+ * Below 3.18 or if the kernel has devcoredump disabled, we copied the
+ * entire devcoredump, so no need to define these functions.
+ */
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,18,0) && \
+	!defined(CPTCFG_BPAUTO_BUILD_WANT_DEV_COREDUMP)
 #include <linux/devcoredump.h>
 
 static void devcd_free_sgtable(void *data)
