@@ -509,6 +509,9 @@ iwl_mvm_set_tx_params(struct iwl_mvm *mvm, struct sk_buff *skb,
 		offload_assist = iwl_mvm_tx_csum(mvm, skb, hdr, info,
 						 offload_assist);
 
+		offload_assist = iwl_mvm_tx_csum(mvm, skb, hdr, info,
+						 offload_assist);
+
 		/* padding is inserted later in transport */
 		if (ieee80211_hdrlen(hdr->frame_control) % 4 &&
 		    !(offload_assist & BIT(TX_CMD_OFFLD_AMSDU)))
