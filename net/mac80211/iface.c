@@ -1264,15 +1264,21 @@ static const struct net_device_ops ieee80211_monitorif_ops = {
 static void ieee80211_if_free(struct net_device *dev)
 {
 	free_percpu(netdev_tstats(dev));
-	free_netdev(dev);
 }
+
+#if LINUX_VERSION_IS_LESS(4,12,0)
+static void __ieee80211_if_free(struct net_device *ndev){
+	ieee80211_if_free(ndev);
+	free_netdev(ndev);
+}
+#endif
 
 static void ieee80211_if_setup(struct net_device *dev)
 {
 	ether_setup(dev);
 	dev->priv_flags &= ~IFF_TX_SKB_SHARING;
 	dev->netdev_ops = &ieee80211_dataif_ops;
-	dev->destructor = ieee80211_if_free;
+	netdev_set_priv_destructor(dev, ieee80211_if_free);
 }
 
 static void ieee80211_if_setup_no_queue(struct net_device *dev)
@@ -1851,6 +1857,7 @@ int ieee80211_if_add(struct ieee80211_local *local, const char *name,
 		ret = dev_alloc_name(ndev, ndev->name);
 		if (ret < 0) {
 			ieee80211_if_free(ndev);
+			free_netdev(ndev);
 			return ret;
 		}
 
@@ -1944,7 +1951,10 @@ int ieee80211_if_add(struct ieee80211_local *local, const char *name,
 
 		ret = register_netdevice(ndev);
 		if (ret) {
+#if LINUX_VERSION_IS_LESS(4,12,0)
 			ieee80211_if_free(ndev);
+#endif
+			free_netdev(ndev);
 			return ret;
 		}
 	}
