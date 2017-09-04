@@ -78,6 +78,8 @@ static void iwl_mvm_read_radio_reg(struct iwl_mvm *mvm,
 	unsigned long flags;
 	int i;
 
+	IWL_DEBUG_INFO(mvm, "WRT radio registers dump\n");
+
 	if (!iwl_trans_grab_nic_access(mvm->trans, &flags))
 		return;
 
@@ -217,6 +219,8 @@ static void iwl_mvm_dump_fifos(struct iwl_mvm *mvm,
 	u32 fifo_len;
 	unsigned long flags;
 	int i, j;
+
+	IWL_DEBUG_INFO(mvm, "WRT FIFO dump\n");
 
 	if (!iwl_trans_grab_nic_access(mvm->trans, &flags))
 		return;
@@ -468,6 +472,8 @@ static void iwl_dump_prph(struct iwl_trans *trans,
 	unsigned long flags;
 	u32 i;
 
+	IWL_DEBUG_INFO(trans, "WRT PRPH dump\n");
+
 	if (!iwl_trans_grab_nic_access(trans, &flags))
 		return;
 
@@ -553,6 +559,8 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 		return;
 
 	lockdep_assert_held(&mvm->mutex);
+
+	IWL_DEBUG_INFO(mvm, "WRT dump start\n");
 
 	/* there's no point in fw dump if the bus is dead */
 	if (test_bit(STATUS_TRANS_DEAD, &mvm->trans->status)) {
@@ -784,6 +792,9 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 		dump_mem->type = fw_dbg_mem[i].data_type;
 		dump_mem->offset = cpu_to_le32(ofs);
 
+		IWL_DEBUG_INFO(mvm, "WRT memory dump. Type=%u\n",
+			       dump_mem->type);
+
 		switch (dump_mem->type & cpu_to_le32(FW_DBG_MEM_TYPE_MASK)) {
 		case cpu_to_le32(FW_DBG_MEM_TYPE_REGULAR):
 			iwl_trans_read_mem_bytes(mvm->trans, ofs,
@@ -809,6 +820,7 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 	}
 
 	if (smem_len) {
+		IWL_DEBUG_INFO(mvm, "WRT SMEM dump\n");
 		dump_data->type = cpu_to_le32(IWL_FW_ERROR_DUMP_MEM);
 		dump_data->len = cpu_to_le32(smem_len + sizeof(*dump_mem));
 		dump_mem = (void *)dump_data->data;
@@ -820,6 +832,7 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 	}
 
 	if (sram2_len) {
+		IWL_DEBUG_INFO(mvm, "WRT SRAM dump\n");
 		dump_data->type = cpu_to_le32(IWL_FW_ERROR_DUMP_MEM);
 		dump_data->len = cpu_to_le32(sram2_len + sizeof(*dump_mem));
 		dump_mem = (void *)dump_data->data;
@@ -834,6 +847,7 @@ void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm)
 	if (!mvm->trans->cfg->gen2 &&
 	    mvm->fw->img[mvm->cur_ucode].paging_mem_size &&
 	    mvm->fw_paging_db[0].fw_paging_block) {
+		IWL_DEBUG_INFO(mvm, "WRT paging dump\n");
 		for (i = 1; i < mvm->num_of_paging_blk + 1; i++) {
 			struct iwl_fw_error_dump_paging *paging;
 			struct page *pages =
@@ -896,6 +910,7 @@ out:
 	iwl_mvm_free_fw_dump_desc(mvm);
 	mvm->fw_dump_trig = NULL;
 	clear_bit(IWL_MVM_STATUS_DUMPING_FW_LOG, &mvm->status);
+	IWL_DEBUG_INFO(mvm, "WRT dump done\n");
 }
 
 const struct iwl_mvm_dump_desc iwl_mvm_dump_desc_assert = {
