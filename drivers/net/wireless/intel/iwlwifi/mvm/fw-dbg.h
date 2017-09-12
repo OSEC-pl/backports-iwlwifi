@@ -67,6 +67,8 @@
 #define __mvm_fw_dbg_h__
 #include "iwl-fw-file.h"
 #include "iwl-fw-error-dump.h"
+#include "iwl-prph.h"
+#include "iwl-io.h"
 #include "mvm.h"
 
 void iwl_mvm_fw_error_dump(struct iwl_mvm *mvm);
@@ -165,6 +167,17 @@ _iwl_fw_dbg_trigger_simple_stop(struct iwl_mvm *mvm,
 		return;
 
 	iwl_mvm_fw_dbg_collect_trig(mvm, trigger, NULL);
+}
+
+static inline void iwl_fw_dbg_stop_recording(struct iwl_mvm *mvm)
+{
+	if (mvm->trans->cfg->device_family == IWL_DEVICE_FAMILY_7000) {
+		iwl_set_bits_prph(mvm->trans, MON_BUFF_SAMPLE_CTL, 0x100);
+	} else {
+		iwl_write_prph(mvm->trans, DBGC_IN_SAMPLE, 0);
+		udelay(100);
+		iwl_write_prph(mvm->trans, DBGC_OUT_CTRL, 0);
+	}
 }
 
 #define iwl_fw_dbg_trigger_simple_stop(mvm, vif, trig)	\

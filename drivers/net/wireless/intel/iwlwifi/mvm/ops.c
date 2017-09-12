@@ -1388,7 +1388,7 @@ static void iwl_mvm_fw_error_dump_wk(struct work_struct *work)
 
 	if (mvm->cfg->device_family == IWL_DEVICE_FAMILY_7000) {
 		/* stop recording */
-		iwl_set_bits_prph(mvm->trans, MON_BUFF_SAMPLE_CTL, 0x100);
+		iwl_fw_dbg_stop_recording(mvm);
 
 		iwl_mvm_fw_error_dump(mvm);
 
@@ -1405,10 +1405,7 @@ static void iwl_mvm_fw_error_dump_wk(struct work_struct *work)
 		u32 in_sample = iwl_read_prph(mvm->trans, DBGC_IN_SAMPLE);
 		u32 out_ctrl = iwl_read_prph(mvm->trans, DBGC_OUT_CTRL);
 
-		/* stop recording */
-		iwl_write_prph(mvm->trans, DBGC_IN_SAMPLE, 0);
-		udelay(100);
-		iwl_write_prph(mvm->trans, DBGC_OUT_CTRL, 0);
+		iwl_fw_dbg_stop_recording(mvm);
 		/* wait before we collect the data till the DBGC stop */
 		udelay(500);
 
