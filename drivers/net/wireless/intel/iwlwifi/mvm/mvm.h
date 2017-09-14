@@ -184,6 +184,8 @@ struct iwl_mvm_phy_ctxt {
 	u16 color;
 	u32 ref;
 
+	enum nl80211_chan_width width;
+
 	/*
 	 * TODO: This should probably be removed. Currently here only for rate
 	 * scaling algorithm
