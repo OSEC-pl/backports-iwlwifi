@@ -72,6 +72,7 @@
 #include <linux/spinlock.h>
 #include <linux/leds.h>
 #include <linux/in6.h>
+#include <linux/pm_qos.h>
 
 #ifdef CONFIG_THERMAL
 #include <linux/thermal.h>
@@ -1244,6 +1245,9 @@ struct iwl_mvm {
 #endif
 	struct iwl_mvm_geo_profile geo_profiles[IWL_NUM_GEO_PROFILES];
 #endif
+
+	/* PM QOS request handle */
+	struct pm_qos_request pm_qos_req;
 };
 
 /* Extract MVM priv from op_mode and _hw */
