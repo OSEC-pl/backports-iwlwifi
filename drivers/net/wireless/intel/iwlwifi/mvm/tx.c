@@ -1893,7 +1893,6 @@ void iwl_mvm_rx_ba_notif(struct iwl_mvm *mvm, struct iwl_rx_cmd_buffer *rxb)
 	if (iwl_mvm_has_new_tx_api(mvm)) {
 		struct iwl_mvm_compressed_ba_notif *ba_res =
 			(void *)pkt->data;
-		u8 lq_color = TX_RES_RATE_TABLE_COL_GET(ba_res->tlc_rate_info);
 
 		sta_id = ba_res->sta_id;
 		ba_info.status.ampdu_ack_len = (u8)le16_to_cpu(ba_res->done);
@@ -1901,10 +1900,16 @@ void iwl_mvm_rx_ba_notif(struct iwl_mvm *mvm, struct iwl_rx_cmd_buffer *rxb)
 		ba_info.status.tx_time =
 			(u16)le32_to_cpu(ba_res->wireless_time);
 		ba_info.status.status_driver_data[0] =
-			RS_DRV_DATA_PACK(lq_color, ba_res->reduced_txp);
+			(void *)(uintptr_t)ba_res->reduced_txp;
 
 		if (!le16_to_cpu(ba_res->tfd_cnt))
 			goto out;
+
+		rcu_read_lock();
+
+		mvmsta = iwl_mvm_sta_from_staid_rcu(mvm, sta_id);
+		if (!mvmsta)
+			goto out_unlock;
 
 		/*
 		 * TODO:
@@ -1924,14 +1929,11 @@ void iwl_mvm_rx_ba_notif(struct iwl_mvm *mvm, struct iwl_rx_cmd_buffer *rxb)
 				   &ba_info, le32_to_cpu(ba_res->tx_rate));
 
 #ifdef CPTCFG_IWLMVM_TCM
-		rcu_read_lock();
-		mvmsta = iwl_mvm_sta_from_staid_rcu(mvm, sta_id);
-		if (mvmsta)
-			iwl_mvm_tx_airtime(mvm, mvmsta,
-					   le32_to_cpu(ba_res->wireless_time));
-		rcu_read_unlock();
+		iwl_mvm_tx_airtime(mvm, mvmsta,
+				   le32_to_cpu(ba_res->wireless_time));
 #endif
-
+out_unlock:
+		rcu_read_unlock();
 out:
 		IWL_DEBUG_TX_REPLY(mvm,
 				   "BA_NOTIFICATION Received from sta_id = %d, flags %x, sent:%d, acked:%d\n",
