@@ -193,8 +193,8 @@ struct iwl_phy_cfg_cmd {
 struct xvt_alive_resp_ver2 {
 	__le16 status;
 	__le16 flags;
-	u8 ucode_minor;
 	u8 ucode_major;
+	u8 ucode_minor;
 	__le16 id;
 	u8 api_minor;
 	u8 api_major;
@@ -212,16 +212,16 @@ struct xvt_alive_resp_ver2 {
 	__le32 scd_base_ptr;		/* SRAM address for SCD */
 	__le32 st_fwrd_addr;		/* pointer to Store and forward */
 	__le32 st_fwrd_size;
-	u8 umac_minor;			/* UMAC version: minor */
 	u8 umac_major;			/* UMAC version: major */
+	u8 umac_minor;			/* UMAC version: minor */
 	__le16 umac_id;			/* UMAC version: id */
 	__le32 error_info_addr;		/* SRAM address for UMAC error log */
 	__le32 dbg_print_buff_addr;
 } __packed; /* ALIVE_RES_API_S_VER_2 */
 
 struct iwl_lmac_alive {
-	__le32 ucode_minor;
 	__le32 ucode_major;
+	__le32 ucode_minor;
 	u8 ver_subtype;
 	u8 ver_type;
 	u8 mac;
@@ -238,8 +238,8 @@ struct iwl_lmac_alive {
 } __packed; /* UCODE_ALIVE_DATA_API_VER_3 */
 
 struct iwl_umac_alive {
-	__le32 umac_minor;		/* UMAC version: minor */
 	__le32 umac_major;		/* UMAC version: major */
+	__le32 umac_minor;		/* UMAC version: minor */
 	__le32 error_info_addr;		/* SRAM address for UMAC error log */
 	__le32 dbg_print_buff_addr;
 } __packed; /* ALIVE_RES_API_S_VER_3 */
