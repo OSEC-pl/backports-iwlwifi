@@ -89,7 +89,7 @@ enum iwl_device_family {
 	IWL_DEVICE_FAMILY_7000,
 	IWL_DEVICE_FAMILY_8000,
 	IWL_DEVICE_FAMILY_9000,
-	IWL_DEVICE_FAMILY_A000,
+	IWL_DEVICE_FAMILY_22000,
 };
 
 /*
@@ -265,7 +265,7 @@ struct iwl_tt_params {
 #define OTP_LOW_IMAGE_SIZE_FAMILY_7000	(16 * 512 * sizeof(u16)) /* 16 KB */
 #define OTP_LOW_IMAGE_SIZE_FAMILY_8000	(32 * 512 * sizeof(u16)) /* 32 KB */
 #define OTP_LOW_IMAGE_SIZE_FAMILY_9000	OTP_LOW_IMAGE_SIZE_FAMILY_8000
-#define OTP_LOW_IMAGE_SIZE_FAMILY_A000	OTP_LOW_IMAGE_SIZE_FAMILY_9000
+#define OTP_LOW_IMAGE_SIZE_FAMILY_22000	OTP_LOW_IMAGE_SIZE_FAMILY_9000
 
 struct iwl_eeprom_params {
 	const u8 regulatory_bands[7];
@@ -329,7 +329,7 @@ struct iwl_pwr_tx_backoff {
  * @vht_mu_mimo_supported: VHT MU-MIMO support
  * @rf_id: need to read rf_id to determine the firmware image
  * @integrated: discrete or integrated
- * @gen2: a000 and on transport operation
+ * @gen2: 22000 and on transport operation
  * @cdb: CDB support
  * @nvm_type: see &enum iwl_nvm_type
  *
@@ -429,9 +429,9 @@ extern const struct iwl_cfg iwl9460_2ac_cfg;
 extern const struct iwl_cfg iwl9560_2ac_cfg;
 extern const struct iwl_cfg iwl9460_2ac_cfg_soc;
 extern const struct iwl_cfg iwl9560_2ac_cfg_soc;
-extern const struct iwl_cfg iwla000_2ac_cfg_hr;
-extern const struct iwl_cfg iwla000_2ac_cfg_hr_cdb;
-extern const struct iwl_cfg iwla000_2ac_cfg_jf;
+extern const struct iwl_cfg iwl22000_2ac_cfg_hr;
+extern const struct iwl_cfg iwl22000_2ac_cfg_hr_cdb;
+extern const struct iwl_cfg iwl22000_2ac_cfg_jf;
 #endif /* CPTCFG_IWLMVM */
 
 #endif /* __IWL_CONFIG_H__ */

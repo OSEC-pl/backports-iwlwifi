@@ -306,7 +306,7 @@ struct iwl_dram_sec_info {
 } __packed; /* DRAM_SEC_INFO_API_S_VER_1 */
 
 /**
- * struct iwl_tx_cmd_gen2 - TX command struct to FW for a000 devices
+ * struct iwl_tx_cmd_gen2 - TX command struct to FW for 22000 devices
  * ( TX_CMD = 0x1c )
  * @len: in bytes of the payload, see below for details
  * @offload_assist: TX offload configuration

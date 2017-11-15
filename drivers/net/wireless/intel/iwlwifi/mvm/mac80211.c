@@ -4934,7 +4934,7 @@ void iwl_mvm_sync_rx_queues_internal(struct iwl_mvm *mvm,
 
 	lockdep_assert_held(&mvm->mutex);
 
-	/* TODO - remove a000 disablement when we have RXQ config API */
+	/* TODO - remove 22000 disablement when we have RXQ config API */
 	if (!iwl_mvm_has_new_rx_api(mvm) || iwl_mvm_has_new_tx_api(mvm))
 		return;
 
