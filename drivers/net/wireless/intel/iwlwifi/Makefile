@@ -17,7 +17,7 @@ iwlwifi-$(CPTCFG_IWLXVT)	+= fw/init.o
 iwlwifi-$(CPTCFG_IWLWIFI_PCIE)	+= pcie/drv.o pcie/rx.o pcie/tx.o pcie/trans.o
 iwlwifi-$(CPTCFG_IWLWIFI_PCIE)	+= pcie/ctxt-info.o pcie/trans-gen2.o pcie/tx-gen2.o
 iwlwifi-$(CPTCFG_IWLWIFI_PCIE)-$(CPTCFG_IWLMVM) += cfg/7000.o cfg/8000.o
-iwlwifi-$(CPTCFG_IWLWIFI_PCIE)-$(CPTCFG_IWLMVM) += cfg/9000.o cfg/a000.o
+iwlwifi-$(CPTCFG_IWLWIFI_PCIE)-$(CPTCFG_IWLMVM) += cfg/9000.o cfg/22000.o
 
 iwlwifi-$(CPTCFG_IWLWIFI_SDIO)	+= trans_slave/shared.o
 iwlwifi-$(CPTCFG_IWLWIFI_SDIO)	+= trans_slave/sdio_drv.o trans_slave/sdio_trans.o trans_slave/sdio_rx.o trans_slave/sdio_tx_policy.o trans_slave/sdio_tx.o
