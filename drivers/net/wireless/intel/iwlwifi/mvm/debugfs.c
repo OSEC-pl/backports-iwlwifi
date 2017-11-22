@@ -758,6 +758,9 @@ static ssize_t iwl_dbgfs_fw_rx_stats_read(struct file *file,
 	general = &mvm->rx_stats.general;
 	ht = &mvm->rx_stats.ofdm_ht;
 
+	if (iwl_mvm_firmware_running(mvm))
+		iwl_mvm_request_statistics(mvm, false);
+
 	pos += scnprintf(buf + pos, bufsz - pos, fmt_header,
 			 "Statistics_Rx - OFDM");
 	PRINT_STATS_LE32(ofdm, ina_cnt);
