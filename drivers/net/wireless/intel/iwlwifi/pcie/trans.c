@@ -2113,7 +2113,7 @@ static bool iwl_trans_pcie_grab_nic_access(struct iwl_trans *trans,
 			  cntrl);
 		spin_unlock_irqrestore(&trans_pcie->reg_lock, *flags);
 
-#ifdef IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
+#ifdef CPTCFG_IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
 		if ((cntrl & 0xffffffff) && !trans_pcie->off_bus) {
 			char *prop[] = {"REASON=OFFBUS", NULL};
 			struct device *dev = trans->dev;
@@ -3498,7 +3498,7 @@ struct iwl_trans *iwl_trans_pcie_alloc(struct pci_dev *pdev,
 		       "iwlwifi_pcie_timed_wakelock");
 #endif
 
-#ifdef IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
+#ifdef CPTCFG_IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
 	trans_pcie->off_bus = false;
 #endif
 	return trans;

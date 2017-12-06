@@ -475,7 +475,7 @@ struct iwl_trans_pcie {
 	u32 fh_mask;
 	u32 hw_mask;
 	cpumask_t affinity_mask[IWL_MAX_RX_HW_QUEUES];
-#ifdef IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
+#ifdef CPTCFG_IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
 	bool off_bus;
 #endif
 };
