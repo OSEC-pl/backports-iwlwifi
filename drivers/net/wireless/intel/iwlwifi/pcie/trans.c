@@ -2104,25 +2104,12 @@ static bool iwl_trans_pcie_grab_nic_access(struct iwl_trans *trans,
 			   (CSR_GP_CNTRL_REG_FLAG_MAC_CLOCK_READY |
 			    CSR_GP_CNTRL_REG_FLAG_GOING_TO_SLEEP), 15000);
 	if (unlikely(ret < 0)) {
-		u32 cntrl = iwl_read32(trans, CSR_GP_CNTRL);
 		iwl_trans_pcie_dump_regs(trans);
 		iwl_write32(trans, CSR_RESET, CSR_RESET_REG_FLAG_FORCE_NMI);
-
 		WARN_ONCE(1,
 			  "Timeout waiting for hardware access (CSR_GP_CNTRL 0x%08x)\n",
-			  cntrl);
+			  iwl_read32(trans, CSR_GP_CNTRL));
 		spin_unlock_irqrestore(&trans_pcie->reg_lock, *flags);
-
-#ifdef CPTCFG_IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
-		if ((cntrl & 0xffffffff) && !trans_pcie->off_bus) {
-			char *prop[] = {"REASON=OFFBUS", NULL};
-			struct device *dev = trans->dev;
-
-			trans_pcie->off_bus = true;
-			kobject_uevent_env(&dev->kobj, KOBJ_CHANGE, prop);
-		}
-#endif
-
 		return false;
 	}
 
@@ -3496,10 +3483,6 @@ struct iwl_trans *iwl_trans_pcie_alloc(struct pci_dev *pdev,
 		       "iwlwifi_pcie_ref_wakelock");
 	wake_lock_init(&trans->timed_wake_lock, WAKE_LOCK_SUSPEND,
 		       "iwlwifi_pcie_timed_wakelock");
-#endif
-
-#ifdef CPTCFG_IWLWIFI_NIC_DISAPPEAR_TRIGGER_UEVENT
-	trans_pcie->off_bus = false;
 #endif
 	return trans;
 
